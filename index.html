@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mario Aziz Coaching Server</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111114;
+    --surface2: #18181d;
+    --surface3: #1e1e25;
+    --border: #252530;
+    --border2: #2e2e3d;
+    --accent: #c8ff57;
+    --accent2: #57c8ff;
+    --accent3: #ff7c57;
+    --text: #e8e8f0;
+    --text-muted: #7a7a95;
+    --text-dim: #4a4a65;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  .sys-header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,12,0.97);
+    backdrop-filter: blur(16px);
+    z-index: 100;
+  }
+  .sys-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    background: var(--accent);
+    color: #0a0a0c;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .sys-title {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text);
+  }
+  .sys-title span {
+    color: var(--accent);
+  }
+  .sys-status {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ─── STEP NAV ─── */
+  .step-nav {
+    padding: 16px 40px;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--surface);
+  }
+  .step-nav::-webkit-scrollbar { display: none; }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .step-item.active { opacity: 1; background: rgba(200,255,87,0.06); }
+  .step-item.done { opacity: 0.6; }
+  .step-item:hover:not(.active) { opacity: 0.75; }
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .step-item.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0a0c;
+    font-weight: 600;
+  }
+  .step-item.done .step-num {
+    background: rgba(200,255,87,0.1);
+    border-color: rgba(200,255,87,0.3);
+    color: var(--accent);
+    font-size: 11px;
+  }
+  .step-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .step-item.active .step-label { color: var(--accent); }
+  .step-item.done .step-label { color: rgba(200,255,87,0.6); }
+  .step-sep {
+    width: 20px; height: 1px;
+    background: var(--border);
+    flex-shrink: 0;
+    margin: 0 2px;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main-wrap {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 52px 40px 120px;
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    display: none;
+    animation: fadeIn 0.25s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+  .section-header { margin-bottom: 44px; }
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 18px; height: 1px;
+    background: var(--accent);
+  }
+  .section-title {
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .section-desc {
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  /* ─── FORM ELEMENTS ─── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.col1 { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.span2 { grid-column: span 2; }
+  .field.span3 { grid-column: span 3; }
+
+  label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  label .req { color: var(--accent3); }
+  label .opt {
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    font-weight: 400;
+  }
+
+  input[type=text], input[type=number], select, textarea {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    background: var(--surface2);
+    box-shadow: 0 0 0 3px rgba(200,255,87,0.07);
+  }
+  input::placeholder, textarea::placeholder { color: var(--text-dim); }
+  select option { background: #18181d; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ─── BLOCK DIVIDER ─── */
+  .block-divider {
+    margin: 30px 0;
+    height: 1px;
+    background: var(--border);
+  }
+  .block-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .block-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── MEAL CARD ─── */
+  .meal-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .meal-card:hover { border-color: rgba(200,255,87,0.15); }
+  .meal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .meal-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .meal-opt-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ─── DAY CARD ─── */
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .day-card:hover { border-color: rgba(200,255,87,0.15); }
+  .day-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .day-card-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .day-card-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .day-card-name {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .day-card-body {
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .day-card-body > .form-grid { margin-top: 16px; }
+  .day-rest-note {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .day-cardio-row {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .day-cardio-row label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ─── EXERCISE TABLE ─── */
+  .exer-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .exer-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+  }
+  .exer-table thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+  }
+  .exer-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 9px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .exer-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .exer-table tbody tr:last-child td { border-bottom: none; }
+  .exer-table tbody tr:hover { background: rgba(200,255,87,0.02); }
+  .exer-table td input[type=text] {
+    background: transparent;
+    border: none;
+    padding: 6px 6px;
+    font-size: 12px;
+    border-radius: 3px;
+    min-width: 0;
+  }
+  .exer-table td input[type=text]:focus {
+    background: var(--surface2);
+    border: 1px solid rgba(200,255,87,0.3);
+    box-shadow: none;
+  }
+  .exer-table td:nth-child(2) input { min-width: 140px; }
+  .exer-table td:nth-child(n+3) input { min-width: 60px; width: 100%; }
+  .exer-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    width: 28px;
+  }
+
+  /* ─── DAY ROW (legacy — keep for fallback) ─── */
+  .day-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 150px;
+    gap: 12px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    padding-top: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .day-tag .day-name {
+    display: block;
+    color: var(--text-dim);
+    font-size: 9px;
+    margin-top: 2px;
+  }
+
+  /* ─── PROMPT / OUTPUT BOXES ─── */
+  .prompt-box, .vars-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .output-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .output-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 6px var(--accent2);
+  }
+  .output-content {
+    padding: 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.85;
+    color: #a0a0c0;
+    white-space: pre-wrap;
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  /* ─── VARIABLE BOX ─── */
+  .vars-content {
+    padding: 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 2;
+    color: #a0a0c0;
+    white-space: pre-wrap;
+    max-height: 520px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .var-key { color: var(--accent2); }
+  .var-section { color: var(--accent); font-weight: 500; letter-spacing: 0.05em; }
+  .var-missing { color: var(--accent3); }
+
+  /* ─── PORTAL BOX ─── */
+  .portal-box {
+    background: #0c0c0f;
+    border: 1px solid rgba(200,255,87,0.25);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 24px;
+    box-shadow: 0 0 40px rgba(200,255,87,0.04), 0 0 0 1px rgba(200,255,87,0.04);
+  }
+  .portal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(200,255,87,0.15);
+    background: rgba(200,255,87,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .portal-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .portal-label::before {
+    content: '◆';
+    font-size: 8px;
+  }
+  .portal-content {
+    padding: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.95;
+    color: #b0b0d0;
+    white-space: pre-wrap;
+    max-height: 620px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0c;
+  }
+  .btn-primary:hover {
+    background: #d4ff6a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 24px rgba(200,255,87,0.22);
+  }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border2);
+  }
+  .btn-secondary:hover { border-color: rgba(200,255,87,0.3); color: var(--accent); }
+  .btn-copy {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border2);
+    padding: 6px 14px;
+    font-size: 10px;
+  }
+  .btn-copy:hover { color: var(--accent2); border-color: var(--accent2); }
+  .btn-danger {
+    background: rgba(255,124,87,0.08);
+    color: var(--accent3);
+    border: 1px solid rgba(255,124,87,0.25);
+  }
+  .btn-danger:hover { background: rgba(255,124,87,0.16); }
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(200,255,87,0.3);
+  }
+  .btn-outline:hover { background: rgba(200,255,87,0.06); }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  /* ─── INSTRUCTION BLOCK ─── */
+  .instruction {
+    background: rgba(87,200,255,0.04);
+    border: 1px solid rgba(87,200,255,0.12);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 12px;
+    color: var(--accent2);
+    font-family: var(--mono);
+    line-height: 1.75;
+    opacity: 0.9;
+  }
+  .instruction strong { color: #d0f0ff; }
+
+  /* ─── MEAL COUNT SELECTOR ─── */
+  .meal-count-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+  .meal-count-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .meal-count-btn {
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .meal-count-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .meal-count-btn.active {
+    background: rgba(200,255,87,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ─── SUPPLEMENT ROW ─── */
+  .supp-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--accent);
+    color: #0a0a0c;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.2s;
+    z-index: 9999;
+    pointer-events: none;
+    letter-spacing: 0.03em;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  /* ─── STEP COMPLETE BANNER ─── */
+  .step-complete {
+    background: rgba(200,255,87,0.05);
+    border: 1px solid rgba(200,255,87,0.2);
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-top: 20px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .step-complete.visible { display: flex; }
+  .step-complete::before { content: '✓'; font-size: 13px; }
+
+  /* ─── PROFILE SUMMARY CARD ─── */
+  .profile-summary {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .profile-summary.visible { display: grid; }
+  .ps-item { display: flex; flex-direction: column; gap: 4px; }
+  .ps-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ps-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 640px) {
+    .main-wrap { padding: 32px 20px 100px; }
+    .sys-header { padding: 14px 20px; }
+    .step-nav { padding: 12px 20px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.cols3 { grid-template-columns: 1fr; }
+    .field.span2, .field.span3 { grid-column: span 1; }
+    .day-row { grid-template-columns: 70px 1fr; }
+    .day-row > *:nth-child(n+3) { grid-column: 2; }
+    .supp-row { grid-template-columns: 1fr 1fr; }
+    .section-title { font-size: 24px; }
+    .profile-summary { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ─── EXERCISE SMART SELECTION ─── */
+  .ex-smart-wrap {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 230px;
+  }
+  .ex-list-sel {
+    flex: 0 0 34px;
+    width: 34px;
+    padding: 5px 0;
+    font-size: 10px;
+    font-family: var(--mono);
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    color: var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .ex-list-sel:focus {
+    outline: none;
+    border-color: rgba(200,255,87,0.6);
+  }
+  .ex-name-sel {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 5px 6px;
+    font-size: 12px;
+    font-family: var(--sans);
+    background: transparent;
+    border: none;
+    color: var(--text);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .ex-name-sel:focus {
+    background: var(--surface2);
+    border: 1px solid rgba(200,255,87,0.3);
+    outline: none;
+  }
+  .ex-name-sel option { background: #18181d; color: var(--text); }
+  .exer-table td:nth-child(2) { min-width: 250px; padding: 3px 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<header class="sys-header">
+  <span class="sys-badge">Server</span>
+  <span class="sys-title">Mario Aziz <span>Coaching</span></span>
+  <div class="sys-status">
+    <span class="status-dot"></span>
+    <span id="statusText">Step 1 of 7</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     STEP NAV
+═══════════════════════════════════════════ -->
+<nav class="step-nav" id="stepNav">
+  <div class="step-item active" data-step="1" onclick="tryGoToStep(1)">
+    <div class="step-num">1</div>
+    <span class="step-label">Client Profile</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="2" onclick="tryGoToStep(2)">
+    <div class="step-num">2</div>
+    <span class="step-label">Nutrition Prompt</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="3" onclick="tryGoToStep(3)">
+    <div class="step-num">3</div>
+    <span class="step-label">Nutrition File</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="4" onclick="tryGoToStep(4)">
+    <div class="step-num">4</div>
+    <span class="step-label">Training Prompt</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="5" onclick="tryGoToStep(5)">
+    <div class="step-num">5</div>
+    <span class="step-label">Training File</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="6" onclick="tryGoToStep(6)">
+    <div class="step-num">6</div>
+    <span class="step-label">Master Variables</span>
+  </div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-step="7" onclick="tryGoToStep(7)">
+    <div class="step-num">7</div>
+    <span class="step-label">Inject Portal</span>
+  </div>
+</nav>
+
+<div class="main-wrap">
+
+<!-- ═══════════════════════════════════════════
+     STEP 1 — CLIENT PROFILE
+═══════════════════════════════════════════ -->
+<div class="section active" id="step1">
+  <div class="section-header">
+    <div class="section-tag">Step 01</div>
+    <h1 class="section-title">Client Profile</h1>
+    <p class="section-desc">Enter client data. Fields marked <span style="color:var(--accent3)">*</span> are required. All others are optional — leave blank to use fallback values.</p>
+  </div>
+
+  <div class="block-label">Identity</div>
+  <div class="form-grid">
+    <div class="field span2">
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="p_name" placeholder="Client full name">
+    </div>
+    <div class="field">
+      <label>Age <span class="req">*</span></label>
+      <input type="number" id="p_age" placeholder="e.g. 28" min="14" max="90">
+    </div>
+    <div class="field">
+      <label>Gender <span class="req">*</span></label>
+      <select id="p_gender">
+        <option value="">— Select —</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Body Stats</div>
+  <div class="form-grid cols3">
+    <div class="field">
+      <label>Height (cm) <span class="req">*</span></label>
+      <input type="number" id="p_height" placeholder="e.g. 175">
+    </div>
+    <div class="field">
+      <label>Current Weight (kg) <span class="req">*</span></label>
+      <input type="number" id="p_current_weight" placeholder="e.g. 85">
+    </div>
+    <div class="field">
+      <label>Target Weight (kg) <span class="req">*</span></label>
+      <input type="number" id="p_target_weight" placeholder="e.g. 72">
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Goal & Activity</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Goal Type <span class="req">*</span></label>
+      <select id="p_goal_type">
+        <option value="">— Select —</option>
+        <option value="Fat Loss">Fat Loss</option>
+        <option value="Muscle Gain">Muscle Gain</option>
+        <option value="Recomp">Body Recomposition</option>
+        <option value="Diabetes">Diabetes (Type 1)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Activity Level <span class="req">*</span></label>
+      <select id="p_activity">
+        <option value="">— Select —</option>
+        <option value="Sedentary">Sedentary (no exercise)</option>
+        <option value="Lightly Active">Lightly Active (1–2x/week)</option>
+        <option value="Moderately Active">Moderately Active (3–4x/week)</option>
+        <option value="Very Active">Very Active (5–6x/week)</option>
+        <option value="Extremely Active">Extremely Active (athlete/2x day)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Training Days / Week <span class="req">*</span></label>
+      <select id="p_training_days">
+        <option value="">— Select —</option>
+        <option>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Training Environment <span class="req">*</span></label>
+      <select id="p_environment">
+        <option value="">— Select —</option>
+        <option>Gym (full equipment)</option>
+        <option>Home (limited equipment)</option>
+        <option>Home (no equipment / bodyweight)</option>
+        <option>Hybrid (gym + home)</option>
+        <option>Outdoor</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-grid col1">
+    <div class="field">
+      <label>Equipment Access <span class="opt">(optional)</span></label>
+      <input type="text" id="p_equipment" placeholder="e.g. Barbells, dumbbells, squat rack, cable machine, resistance bands">
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Nutrition Preferences</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Dietary Preferences / Restrictions <span class="opt">(optional)</span></label>
+      <input type="text" id="p_diet_pref" placeholder="e.g. No pork, lactose-free, high protein">
+    </div>
+    <div class="field">
+      <label>Disliked Foods <span class="opt">(optional)</span></label>
+      <input type="text" id="p_unpreferred_foods" placeholder="e.g. Liver, beans, broccoli">
+    </div>
+    <div class="field">
+      <label>Weekly Food Budget (EGP) <span class="opt">(optional)</span></label>
+      <input type="number" id="p_budget" placeholder="e.g. 500">
+    </div>
+    <div class="field">
+      <label>Meals Per Day <span class="opt">(optional — set in Step 3)</span></label>
+      <select id="p_meals_per_day">
+        <option value="">— Select or skip —</option>
+        <option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Health & Motivation</div>
+  <div class="form-grid col1">
+    <div class="field">
+      <label>Medical Conditions / Injuries / Limitations <span class="opt">(optional)</span></label>
+      <textarea id="p_medical" placeholder="e.g. Lower back pain, knee issue, Type 1 diabetes, no overhead pressing"></textarea>
+    </div>
+    <div class="field">
+      <label>Client Motivation — WHY are they starting? <span class="req">*</span></label>
+      <textarea id="p_motivation" placeholder="e.g. Wedding in 4 months, doctor's recommendation, low energy, build confidence"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="completeStep1()">
+      Confirm Profile →
+    </button>
+    <button class="btn btn-danger" onclick="resetSystem()" style="margin-left:auto">⟲ Reset</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 2 — NUTRITION PROMPT
+═══════════════════════════════════════════ -->
+<div class="section" id="step2">
+  <div class="section-header">
+    <div class="section-tag">Step 02</div>
+    <h1 class="section-title">Nutrition Engine</h1>
+    <p class="section-desc">Generate a tailored AI prompt from the client profile. Copy and use in Claude or ChatGPT, then return.</p>
+  </div>
+
+  <div id="profileSummary2" class="profile-summary"></div>
+
+  <div class="instruction">
+    <strong>WORKFLOW:</strong> Click Generate Prompt → Copy it → Paste into Claude / ChatGPT → Receive the meal plan → Return here → Proceed to Step 3 to input the results.
+  </div>
+
+  <div class="btn-row" style="margin-top:0">
+    <button class="btn btn-primary" onclick="generateNutritionPrompt()">
+      Generate Nutrition Prompt
+    </button>
+  </div>
+
+  <div class="prompt-box" id="nutritionPromptBox" style="display:none">
+    <div class="output-header">
+      <span class="output-label">Nutrition Prompt — Ready to Copy</span>
+      <button class="btn btn-copy" onclick="copyText('nutritionPromptText', this)">Copy Prompt</button>
+    </div>
+    <div class="output-content" id="nutritionPromptText"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+    <button class="btn btn-primary" onclick="goToStep(3)">Used AI — Proceed →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 3 — NUTRITION CLIENT FILE
+═══════════════════════════════════════════ -->
+<div class="section" id="step3">
+  <div class="section-header">
+    <div class="section-tag">Step 03</div>
+    <h1 class="section-title">Nutrition Client File</h1>
+    <p class="section-desc">Input the AI-generated meal plan into structured fields. Only Diet Name and Type are required.</p>
+  </div>
+
+  <div class="block-label">Diet Overview</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Diet Name <span class="req">*</span></label>
+      <input type="text" id="n_diet_name" placeholder="e.g. High-Protein Fat Loss Plan">
+    </div>
+    <div class="field">
+      <label>Diet Type <span class="req">*</span></label>
+      <select id="n_diet_type">
+        <option value="">— Select —</option>
+        <option>Cutting</option>
+        <option>Maintenance</option>
+        <option>Surplus</option>
+        <option>Diabetic-Friendly</option>
+        <option>Performance</option>
+      </select>
+    </div>
+    <div class="field span2">
+      <label>Diet Description <span class="opt">(optional)</span></label>
+      <input type="text" id="n_diet_desc" placeholder="e.g. 1,800 kcal/day, 160g protein, moderate carbs, minimal processed food">
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Meal Plan</div>
+
+  <div class="meal-count-bar">
+    <span class="meal-count-label">Meals per day:</span>
+    <button class="meal-count-btn active" data-count="1" onclick="setMealCount(1)">1</button>
+    <button class="meal-count-btn" data-count="2" onclick="setMealCount(2)">2</button>
+    <button class="meal-count-btn" data-count="3" onclick="setMealCount(3)">3</button>
+    <button class="meal-count-btn" data-count="4" onclick="setMealCount(4)">4</button>
+    <button class="meal-count-btn" data-count="5" onclick="setMealCount(5)">5</button>
+  </div>
+
+  <div id="mealsContainer"></div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Diet Approach</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Diet Approach Type <span class="opt">(optional)</span></label>
+      <select id="n_diet_approach">
+        <option value="">— Select —</option>
+        <option>Balance</option>
+        <option>Low Carb</option>
+        <option>Carb Cycle</option>
+        <option>Keto</option>
+        <option>PSMF</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Supplements <span style="font-size:9px;color:var(--text-dim);text-transform:none;letter-spacing:0">(all optional)</span></div>
+  <div class="supp-row">
+    <div class="field">
+      <label>Supp 1</label>
+      <input type="text" id="n_supp1" placeholder="e.g. Whey 30g">
+    </div>
+    <div class="field">
+      <label>Supp 2</label>
+      <input type="text" id="n_supp2" placeholder="e.g. Creatine 5g">
+    </div>
+    <div class="field">
+      <label>Supp 3</label>
+      <input type="text" id="n_supp3" placeholder="e.g. Vitamin D">
+    </div>
+    <div class="field">
+      <label>Supp 4</label>
+      <input type="text" id="n_supp4" placeholder="e.g. Omega-3">
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Custom Instructions <span style="font-size:9px;color:var(--text-dim);text-transform:none;letter-spacing:0">(all optional)</span></div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Pre-Workout</label>
+      <input type="text" id="n_pre_workout" placeholder="e.g. Meal 1–2 hrs before training">
+    </div>
+    <div class="field">
+      <label>Post-Workout</label>
+      <input type="text" id="n_post_workout" placeholder="e.g. Protein shake within 30 min">
+    </div>
+    <div class="field">
+      <label>Hydration</label>
+      <input type="text" id="n_hydration" placeholder="e.g. Min 3L water/day">
+    </div>
+    <div class="field">
+      <label>Sleep</label>
+      <input type="text" id="n_sleep" placeholder="e.g. 7–9 hrs/night">
+    </div>
+    <div class="field span2">
+      <label>Coaching Notes</label>
+      <input type="text" id="n_adherence" placeholder="e.g. Weigh in every Monday morning fasted, log meals daily">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+    <button class="btn btn-primary" onclick="completeStep3()">Confirm Nutrition File →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 4 — TRAINING PROMPT
+═══════════════════════════════════════════ -->
+<div class="section" id="step4">
+  <div class="section-header">
+    <div class="section-tag">Step 04</div>
+    <h1 class="section-title">Training System</h1>
+    <p class="section-desc">Generate a 12-week training prompt tailored to the client's goal, equipment, and limitations.</p>
+  </div>
+
+  <div id="profileSummary4" class="profile-summary"></div>
+
+  <div class="instruction">
+    <strong>WORKFLOW:</strong> Click Generate Prompt → Copy → Paste into Claude / ChatGPT → Receive 12-week program → Return to Step 5 to input the structure.
+  </div>
+
+  <div class="btn-row" style="margin-top:0">
+    <button class="btn btn-primary" onclick="generateTrainingPrompt()">
+      Generate Training Prompt
+    </button>
+  </div>
+
+  <div class="prompt-box" id="trainingPromptBox" style="display:none">
+    <div class="output-header">
+      <span class="output-label">Training Prompt — Ready to Copy</span>
+      <button class="btn btn-copy" onclick="copyText('trainingPromptText', this)">Copy Prompt</button>
+    </div>
+    <div class="output-content" id="trainingPromptText"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+    <button class="btn btn-primary" onclick="goToStep(5)">Used AI — Proceed →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 5 — TRAINING CLIENT FILE
+═══════════════════════════════════════════ -->
+<div class="section" id="step5">
+  <div class="section-header">
+    <div class="section-tag">Step 05</div>
+    <h1 class="section-title">Training Client File</h1>
+    <p class="section-desc">Input the AI-generated program structure. Only the split name is required.</p>
+  </div>
+
+  <div class="block-label">Split Overview</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Workout Split Name <span class="req">*</span></label>
+      <input type="text" id="t_split_name" placeholder="e.g. Upper / Lower, PPL, Full Body">
+    </div>
+    <div class="field">
+      <label>Workout Sheet / Reference Link <span class="opt">(optional)</span></label>
+      <input type="text" id="t_table_link" placeholder="e.g. Google Sheets URL or 'See Attached PDF'">
+    </div>
+  </div>
+
+  <div class="block-divider"></div>
+  <div class="block-label">Weekly Structure</div>
+
+  <div id="weeklyDays"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(4)">← Back</button>
+    <button class="btn btn-primary" onclick="completeStep5()">Confirm Training File →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 6 — MASTER VARIABLES
+═══════════════════════════════════════════ -->
+<div class="section" id="step6">
+  <div class="section-header">
+    <div class="section-tag">Step 06</div>
+    <h1 class="section-title">Master Variables</h1>
+    <p class="section-desc">All client data compiled into a structured variable map. Ready for portal injection.</p>
+  </div>
+
+  <div class="instruction">
+    <strong>HOW IT WORKS:</strong> This generates a clean <code style="color:var(--accent2)">{{VARIABLE}}</code> map from all steps. Missing values are flagged. Copy and use directly in any template system.
+  </div>
+
+  <div class="btn-row" style="margin-top:0">
+    <button class="btn btn-primary" onclick="generateMasterVariables()">
+      Generate Master Variables
+    </button>
+  </div>
+
+  <div class="vars-box" id="varsBox" style="display:none">
+    <div class="output-header">
+      <span class="output-label">Master Variables Map — Complete</span>
+      <button class="btn btn-copy" onclick="copyText('varsContent', this)">Copy All</button>
+    </div>
+    <div class="vars-content" id="varsContent"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(5)">← Back</button>
+    <button class="btn btn-primary" onclick="goToStep(7)">Proceed to Portal →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 7 — INJECT INTO PORTAL
+═══════════════════════════════════════════ -->
+<div class="section" id="step7">
+  <div class="section-header">
+    <div class="section-tag">Step 07 — Final</div>
+    <h1 class="section-title">Inject Into Portal</h1>
+    <p class="section-desc">Final copy-ready output. All variables injected. Paste directly into your coaching system.</p>
+  </div>
+
+  <div class="instruction">
+    <strong>OUTPUT:</strong> This is the final portal block with all master variables included. Copy and paste directly into Claude or your coaching portal. No further editing needed.
+  </div>
+
+  <div class="btn-row" style="margin-top:0">
+    <button class="btn btn-primary" onclick="injectPortal()">
+      ◆ Inject Into Portal
+    </button>
+  </div>
+
+  <div class="portal-box" id="portalBox" style="display:none">
+    <div class="portal-header">
+      <span class="portal-label">Portal Output — Injection Complete</span>
+      <button class="btn btn-copy" onclick="copyText('portalContent', this)">Copy Portal</button>
+    </div>
+    <div class="portal-content" id="portalContent"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(6)">← Back to Variables</button>
+    <button class="btn btn-danger" onclick="resetSystem()" style="margin-left:auto">⟲ Reset System</button>
+  </div>
+</div>
+
+</div><!-- /main-wrap -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════
+const state = {
+  currentStep: 1,
+  completedSteps: new Set(),
+  mealCount: 1,
+  profile: {},
+  nutrition: {},
+  training: {},
+  masterVars: null
+};
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Sync meal count from profile selector if set
+  const prefMeals = document.getElementById('p_meals_per_day');
+  prefMeals.addEventListener('change', () => {
+    const val = parseInt(prefMeals.value);
+    if (val >= 1 && val <= 5) setMealCount(val);
+  });
+  renderMeals(state.mealCount);
+  renderWeeklyDays();
+});
+
+// ════════════════════════════════════════════════════
+// MEAL COUNT
+// ════════════════════════════════════════════════════
+function setMealCount(n) {
+  state.mealCount = n;
+  document.querySelectorAll('.meal-count-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.count) === n);
+  });
+  renderMeals(n);
+}
+
+function renderMeals(count) {
+  const container = document.getElementById('mealsContainer');
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const isOpt = count > 3 && i > 3;
+    container.innerHTML += `
+    <div class="meal-card">
+      <div class="meal-card-header">
+        <span class="meal-num">Meal ${i}</span>
+        ${isOpt ? '<span class="meal-opt-badge">optional</span>' : ''}
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Meal Name</label>
+          <input type="text" id="meal${i}_name" placeholder="e.g. Breakfast / Post-Workout / Dinner">
+        </div>
+        <div class="field">
+          <label>Timing <span class="opt">(optional)</span></label>
+          <input type="text" id="meal${i}_timing" placeholder="e.g. 7:00 AM / 30 min after training">
+        </div>
+        <div class="field span2">
+          <label>Ingredients & Description <span class="opt">(optional)</span></label>
+          <textarea id="meal${i}_desc" rows="2" placeholder="e.g. 4 eggs scrambled + 2 slices whole wheat toast + 1 cup yogurt"></textarea>
+        </div>
+        <div class="field">
+          <label>Calories (kcal) <span class="opt">(optional)</span></label>
+          <input type="number" id="meal${i}_cals" placeholder="e.g. 450">
+        </div>
+        <div class="field">
+          <label>Protein (g) <span class="opt">(optional)</span></label>
+          <input type="number" id="meal${i}_protein" placeholder="e.g. 38">
+        </div>
+      </div>
+    </div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════
+// WEEKLY DAYS — per-day card with exercise table
+// ════════════════════════════════════════════════════
+const DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+function renderWeeklyDays() {
+  const container = document.getElementById('weeklyDays');
+  container.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const n = i + 1;
+    container.innerHTML += `
+    <div class="day-card" id="dayCard${n}">
+      <div class="day-card-header">
+        <div class="day-card-title">
+          <span class="day-card-num">Day ${n}</span>
+          <span class="day-card-name">${DAY_NAMES[i]} <span style="color:var(--text-dim);font-size:10px">— As Day ${n}</span></span>
+        </div>
+        <div class="field" style="min-width:180px">
+          <label>Type</label>
+          <select id="day${n}_type" onchange="toggleDayCard(${n})">
+            <option value="">— Select —</option>
+            <option>Training Day</option>
+            <option>Rest Day</option>
+            <option>Active Recovery</option>
+            <option>Cardio Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="day-card-body" id="dayBody${n}" style="display:none">
+        <div class="form-grid" style="margin-bottom:16px">
+          <div class="field span2">
+            <label>Training Day Workout / Focus</label>
+            <input type="text" id="day${n}_workout" placeholder="e.g. Chest &amp; Triceps / Upper Push / Legs">
+          </div>
+        </div>
+
+        <div class="exer-table-wrap">
+          <table class="exer-table" id="exerTable${n}">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Exercise <span style="color:var(--text-dim);font-size:9px;font-weight:400;font-family:var(--mono)">list · name</span></th>
+                <th>Warm-up Sets</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Load</th>
+                <th>Rest</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${[1,2,3,4,5,6,7].map(r => `
+              <tr>
+                <td class="exer-num">${r}</td>
+                <td>${buildExerciseCell(n, r)}</td>
+                <td><input type="text" id="day${n}_ex${r}_warmup" placeholder="e.g. 2x8"></td>
+                <td><input type="text" id="day${n}_ex${r}_sets" placeholder="e.g. 4"></td>
+                <td><input type="text" id="day${n}_ex${r}_reps" placeholder="e.g. 8–12"></td>
+                <td><input type="text" id="day${n}_ex${r}_load" placeholder="e.g. 70%"></td>
+                <td><input type="text" id="day${n}_ex${r}_rest" placeholder="e.g. 90s"></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="day-cardio-row">
+          <label>Cardio <span class="opt">(optional)</span></label>
+          <input type="text" id="day${n}_cardio" placeholder="e.g. 20 min LISS / 10 min HIIT / None">
+        </div>
+      </div>
+
+      <div class="day-rest-note" id="dayRest${n}" style="display:none">
+        <span style="color:var(--text-dim);font-family:var(--mono);font-size:11px">Rest / Recovery Day — No exercise table needed</span>
+        <div style="margin-top:10px" class="field">
+          <label>Cardio <span class="opt">(optional)</span></label>
+          <input type="text" id="day${n}_cardio_rest" placeholder="e.g. 30 min walk / None">
+        </div>
+      </div>
+    </div>`;
+  }
+}
+
+function toggleDayCard(n) {
+  const type = document.getElementById(`day${n}_type`).value;
+  const body = document.getElementById(`dayBody${n}`);
+  const rest = document.getElementById(`dayRest${n}`);
+  if (type === 'Training Day') {
+    body.style.display = 'block';
+    rest.style.display = 'none';
+  } else if (type === 'Rest Day' || type === 'Active Recovery' || type === 'Cardio Only') {
+    body.style.display = 'none';
+    rest.style.display = 'block';
+  } else {
+    body.style.display = 'none';
+    rest.style.display = 'none';
+  }
+}
+
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
+function goToStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+  state.currentStep = n;
+  document.getElementById('statusText').textContent = `Step ${n} of 7`;
+
+  document.querySelectorAll('.step-item').forEach(item => {
+    const s = parseInt(item.dataset.step);
+    item.classList.remove('active', 'done');
+    const num = item.querySelector('.step-num');
+    if (s === n) {
+      item.classList.add('active');
+      num.textContent = s;
+    } else if (state.completedSteps.has(s)) {
+      item.classList.add('done');
+      num.textContent = '✓';
+    } else {
+      num.textContent = s;
+    }
+  });
+
+  // Populate profile summaries
+  if ((n === 2 || n === 4) && state.profile.name) {
+    renderProfileSummary(`profileSummary${n}`);
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function tryGoToStep(n) {
+  // Allow back-navigation freely; forward requires completion
+  if (n <= state.currentStep || state.completedSteps.has(n - 1) || n === 1) {
+    goToStep(n);
+  } else {
+    showToast(`Complete Step ${n - 1} first`, 'var(--accent3)');
+  }
+}
+
+function renderProfileSummary(elId) {
+  const p = state.profile;
+  const el = document.getElementById(elId);
+  if (!el || !p.name) return;
+  el.innerHTML = `
+    <div class="ps-item"><span class="ps-label">Client</span><span class="ps-val">${p.name}</span></div>
+    <div class="ps-item"><span class="ps-label">Goal</span><span class="ps-val">${p.goalType || '—'}</span></div>
+    <div class="ps-item"><span class="ps-label">Weight</span><span class="ps-val">${p.currentWeight}kg → ${p.targetWeight}kg</span></div>
+    <div class="ps-item"><span class="ps-label">Training</span><span class="ps-val">${p.trainingDays} days/wk</span></div>
+    <div class="ps-item"><span class="ps-label">Environment</span><span class="ps-val">${p.environment || '—'}</span></div>
+    <div class="ps-item"><span class="ps-label">Activity</span><span class="ps-val">${p.activity || '—'}</span></div>
+  `;
+  el.classList.add('visible');
+}
+
+// ════════════════════════════════════════════════════
+// STEP 1 — COMPLETE PROFILE
+// ════════════════════════════════════════════════════
+function completeStep1() {
+  const required = ['p_name','p_age','p_gender','p_height','p_current_weight','p_target_weight','p_goal_type','p_activity','p_training_days','p_environment','p_motivation'];
+  for (const id of required) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if (el) el.focus();
+      showToast('Please fill all required fields', 'var(--accent3)');
+      return;
+    }
+  }
+
+  state.profile = {
+    name:           v('p_name'),
+    age:            v('p_age'),
+    gender:         v('p_gender'),
+    height:         v('p_height'),
+    currentWeight:  v('p_current_weight'),
+    targetWeight:   v('p_target_weight'),
+    goalType:       v('p_goal_type'),
+    activity:       v('p_activity'),
+    trainingDays:   v('p_training_days'),
+    environment:    v('p_environment'),
+    equipment:      v('p_equipment')          || 'Standard gym equipment',
+    dietPref:       v('p_diet_pref')          || 'None',
+    unpreferredFoods: v('p_unpreferred_foods')|| 'None',
+    budget:         v('p_budget')             || 'Not specified',
+    mealsPerDay:    v('p_meals_per_day')       || String(state.mealCount),
+    medical:        v('p_medical')            || 'None',
+    motivation:     v('p_motivation')
+  };
+
+  // Auto-sync meal count if profile sets it
+  const mpc = parseInt(state.profile.mealsPerDay);
+  if (mpc >= 1 && mpc <= 5) setMealCount(mpc);
+
+  state.completedSteps.add(1);
+  goToStep(2);
+}
+
+// ════════════════════════════════════════════════════
+// STEP 2 — GENERATE NUTRITION PROMPT
+// ════════════════════════════════════════════════════
+function generateNutritionPrompt() {
+  const p = state.profile;
+  if (!p.name) { showToast('Complete Step 1 first', 'var(--accent3)'); return; }
+
+  const serviceMap = {
+    'Fat Loss':    'SERVICE: Weight Loss — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist and fat-loss coach with 15+ years of experience designing personalized, budget-friendly, high-protein meal plans for sustainable weight loss without extreme restriction.',
+    'Muscle Gain': 'SERVICE: Muscle Gain — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist and healthy weight-gain coach with 15+ years of experience creating practical, budget-friendly, high-protein meal plans for controlled, healthy, sustainable weight gain.',
+    'Diabetes':    'SERVICE: Diabetes — Medical Nutrition Therapy Support (Type 1)\nYou are a diabetes nutrition specialist with extensive experience creating safe, practical, budget-conscious meal plans for people with Type 1 diabetes. CRITICAL: Do not calculate, change, or recommend insulin doses. Only organize meals and carbohydrate distribution.',
+    'Recomp':      'SERVICE: Body Recomposition — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist with 15+ years of experience designing recomposition-focused, high-protein meal plans that simultaneously reduce fat and build lean muscle.'
+  };
+  const serviceBlock = serviceMap[p.goalType] || serviceMap['Recomp'];
+
+  const weightDiff = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
+  const weightDirection = weightDiff < 0 ? 'loss' : weightDiff > 0 ? 'gain' : 'maintenance';
+
+  const prompt = `${serviceBlock}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━
+- Name: ${p.name}
+- Age: ${p.age} | Gender: ${p.gender}
+- Height: ${p.height} cm | Current weight: ${p.currentWeight} kg | Target: ${p.targetWeight} kg
+- Weight direction: ${weightDirection} (${Math.abs(weightDiff).toFixed(1)} kg total)
+- Activity level: ${p.activity}
+- Training days/week: ${p.trainingDays}
+- Dietary preferences/restrictions: ${p.dietPref}
+- Disliked foods: ${p.unpreferredFoods}
+- Weekly food budget (EGP): ${p.budget}
+- Meals per day: ${p.mealsPerDay}
+- Medical conditions / limitations: ${p.medical}
+- Country / food availability: Egypt
+- Client motivation: ${p.motivation}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+NON-NEGOTIABLE REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━
+- Prioritize high-protein meals (fullness + muscle retention/gain)
+- Use affordable, common Egyptian foods
+- Give exact portions in grams, cups, spoons, or pieces
+- Include estimated calories AND protein for each meal
+- Make the plan easy to repeat and easy to prep
+- Include smart swaps for disliked or unavailable foods
+- Include hunger-control and adherence strategies
+- Focus on long-term consistency, not short-term perfection
+
+━━━━━━━━━━━━━━━━━━━━━━━
+WHAT YOU MUST DELIVER
+━━━━━━━━━━━━━━━━━━━━━━━
+1. Brief assessment of strategy (fat-loss / gain / recomp direction)
+2. Daily calorie target, protein target, macro breakdown
+3. Full daily meal plan with timing and exact portions (${p.mealsPerDay} meals)
+4. Calories and protein for every meal and snack
+5. Alternative food options for each meal
+6. 7-day repeatable structure
+7. One-week shopping list (budget-friendly Egyptian foods)
+8. Food swaps for budget, availability, and taste
+9. Tips to improve satiety, control cravings, stay consistent
+10. Common mistakes to avoid
+11. Simple adherence checklist
+
+━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━
+Strategy Summary → Nutrition Targets → Meal Plan → Food Swaps → Shopping List → Tips → Mistakes to Avoid → Adherence Checklist
+
+Be specific, practical, and direct. No vague or generic answers. Use realistic Egyptian household foods.`;
+
+  document.getElementById('nutritionPromptText').textContent = prompt;
+  document.getElementById('nutritionPromptBox').style.display = 'block';
+  document.getElementById('nutritionPromptBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ════════════════════════════════════════════════════
+// STEP 3 — COMPLETE NUTRITION FILE
+// ════════════════════════════════════════════════════
+function completeStep3() {
+  if (!v('n_diet_name') || !v('n_diet_type')) {
+    showToast('Fill Diet Name and Type', 'var(--accent3)');
+    return;
+  }
+
+  const meals = [];
+  for (let i = 1; i <= state.mealCount; i++) {
+    const name = v(`meal${i}_name`);
+    const desc = v(`meal${i}_desc`);
+    meals.push({
+      name:    name    || `Meal ${i}`,
+      timing:  v(`meal${i}_timing`)  || 'Not specified',
+      desc:    desc    || 'Not specified',
+      cals:    v(`meal${i}_cals`)    || '—',
+      protein: v(`meal${i}_protein`) || '—'
+    });
+  }
+
+  state.nutrition = {
+    dietName:    v('n_diet_name'),
+    dietType:    v('n_diet_type'),
+    dietApproach: v('n_diet_approach') || 'Not specified',
+    dietDesc:    v('n_diet_desc')      || 'Not specified',
+    meals,
+    mealCount:   state.mealCount,
+    supps:       [v('n_supp1')||'None', v('n_supp2')||'None', v('n_supp3')||'None', v('n_supp4')||'None'],
+    preWorkout:  v('n_pre_workout')    || 'Not specified',
+    postWorkout: v('n_post_workout')   || 'Not specified',
+    hydration:   v('n_hydration')      || 'Not specified',
+    sleep:       v('n_sleep')          || 'Not specified',
+    adherence:   v('n_adherence')      || 'Not specified'
+  };
+
+  state.completedSteps.add(3);
+  goToStep(4);
+}
+
+// ════════════════════════════════════════════════════
+// STEP 4 — GENERATE TRAINING PROMPT
+// ════════════════════════════════════════════════════
+function generateTrainingPrompt() {
+  const p = state.profile;
+  if (!p.name) { showToast('Complete Step 1 first', 'var(--accent3)'); return; }
+
+  const prompt = `SYSTEM: Autonomous Strength & Conditioning AI — Elite Periodization Architect — Injury-Safe Performance Coach
+
+Your task: Build a complete 12-week training system, immediately executable, fully customized, science-based periodization, progressive in volume and intensity, safe for any listed injuries, appropriate for the available equipment and environment.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━
+- Name: ${p.name}
+- Age: ${p.age} | Gender: ${p.gender}
+- Height: ${p.height} cm | Weight: ${p.currentWeight} kg
+- Primary Goal: ${p.goalType}
+- Training Days/Week: ${p.trainingDays}
+- Training Environment: ${p.environment}
+- Available Equipment: ${p.equipment}
+- Activity Level: ${p.activity}
+- Medical Conditions / Injuries / Limitations: ${p.medical}
+- Client Motivation: ${p.motivation}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+DECISION ENGINE (Apply internally — do not narrate)
+━━━━━━━━━━━━━━━━━━━━━━━
+- Select periodization model based on goal:
+  Hypertrophy → Accumulation → Intensification → Deload → Peak
+  Strength → Neural Adaptation → Heavy Accumulation → Peaking → Deload
+  Fat Loss → Strength Retention + Metabolic Conditioning Blocks
+- Volume: Beginner 8–12 sets/muscle/week | Intermediate 12–18 | Advanced 14–24
+- Intensity: Hypertrophy 60–80% 1RM (RPE 6–9) | Strength 75–95% 1RM (RPE 7–10)
+- Progression: Increase load OR reps OR sets weekly (not all simultaneously)
+- Every 4th week = deload or reduced volume
+- Injury rule: Never load painful range. Always provide substitution for push / pull / hinge / squat / carry / core
+
+━━━━━━━━━━━━━━━━━━━━━━━
+REQUIRED OUTPUT (STRICT FORMAT)
+━━━━━━━━━━━━━━━━━━━━━━━
+A) CLIENT SNAPSHOT — Summary of client status, goal, limitations, strategy
+B) TRAINING STRATEGY (12 WEEKS) — Periodization logic, phase-by-phase expectations
+C) SPLIT DESIGN — Selected split with scientific rationale
+D) 12-WEEK MACRO OVERVIEW TABLE — Week | Phase | Goal | Volume Trend | Intensity Trend | Focus | Recovery Note | Injury Adjustment
+E) FULL PROGRAM (WEEKLY STRUCTURE) — For each session: Warm-up | Main Lifts | Accessories | Core | Conditioning (if needed). Per exercise: Sets / Reps / RPE | Rest time | Tempo | Substitution option
+F) PROGRESSION MODEL — Weekly load increases, volume reduction triggers, deload structure, progress measurement
+G) INJURY & SAFETY SYSTEM — Per injury: Prohibited movements | Substitutions | ROM adjustments | Warning signals
+H) COACHING NOTES (CLIENT-FACING) — Execution rules | Common mistakes | Progress indicators | Load reduction signals
+I) PERFORMANCE OUTCOME MODEL — Realistic 12-week expectations | Success indicators for goal type
+
+━━━━━━━━━━━━━━━━━━━━━━━
+STYLE RULES
+━━━━━━━━━━━━━━━━━━━━━━━
+- No motivational filler — every sentence must be actionable
+- Do not assume equipment not listed above
+- Do not ignore injuries
+- Do not repeat the same intensity week-over-week
+- Output must be coach-grade, not fitness blog content
+- Use sport science terminology where appropriate`;
+
+  document.getElementById('trainingPromptText').textContent = prompt;
+  document.getElementById('trainingPromptBox').style.display = 'block';
+  document.getElementById('trainingPromptBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ════════════════════════════════════════════════════
+// STEP 5 — COMPLETE TRAINING FILE
+// ════════════════════════════════════════════════════
+function completeStep5() {
+  if (!v('t_split_name')) { showToast('Fill the split name', 'var(--accent3)'); return; }
+
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const type = v(`day${i}_type`) || 'Rest Day';
+    const isTraining = type === 'Training Day';
+    // cardio comes from different field depending on day type
+    const cardio = isTraining
+      ? (v(`day${i}_cardio`) || 'None')
+      : (v(`day${i}_cardio_rest`) || 'None');
+
+    const exercises = [];
+    if (isTraining) {
+      for (let r = 1; r <= 7; r++) {
+        const name = v(`day${i}_ex${r}_name`);
+        if (name) {
+          exercises.push({
+            num:    r,
+            name,
+            warmup: v(`day${i}_ex${r}_warmup`) || '—',
+            sets:   v(`day${i}_ex${r}_sets`)   || '—',
+            reps:   v(`day${i}_ex${r}_reps`)   || '—',
+            load:   v(`day${i}_ex${r}_load`)   || '—',
+            rest:   v(`day${i}_ex${r}_rest`)   || '—'
+          });
+        }
+      }
+    }
+
+    days.push({
+      num:     i,
+      name:    DAY_NAMES[i - 1],
+      type,
+      workout: v(`day${i}_workout`) || (isTraining ? 'Training' : type),
+      cardio,
+      exercises
+    });
+  }
+
+  state.training = {
+    splitName:    v('t_split_name'),
+    tableLink:    v('t_table_link') || 'Not provided',
+    days,
+    trainingDays: days.filter(d => d.type === 'Training Day').length || parseInt(state.profile.trainingDays) || 3,
+    restDays:     days.filter(d => d.type === 'Rest Day').length
+  };
+
+  state.completedSteps.add(5);
+  goToStep(6);
+}
+
+// ════════════════════════════════════════════════════
+// STEP 6 — GENERATE MASTER VARIABLES
+// ════════════════════════════════════════════════════
+function generateMasterVariables() {
+  const p = state.profile;
+  const n = state.nutrition;
+  const t = state.training;
+
+  if (!p.name) { showToast('Complete client profile first', 'var(--accent3)'); return; }
+
+  const miss  = val => (val && val !== '' && val !== 'None' && val !== 'Not specified' && val !== 'Not provided') ? val : 'Missing';
+  const safe  = val => (val && val !== '') ? val : 'Missing';
+
+  const weightDiff = parseFloat(p.targetWeight || 0) - parseFloat(p.currentWeight || 0);
+  const diffStr    = weightDiff < 0
+    ? `${Math.abs(weightDiff).toFixed(1)} kg loss`
+    : `${weightDiff.toFixed(1)} kg gain`;
+
+  const subtitleMap = {
+    'Fat Loss':    'Fat Loss Phase',
+    'Muscle Gain': 'Muscle Gain Phase',
+    'Diabetes':    'Medical Nutrition Phase',
+    'Recomp':      'Recomposition Phase'
+  };
+  const subtitle = subtitleMap[p.goalType] || 'Coaching Phase';
+
+  // Meals block — dynamic count
+  let mealsBlock = '';
+  const mealCount = n.meals ? n.meals.length : 0;
+  const MAX_MEALS = 5;
+  for (let i = 0; i < MAX_MEALS; i++) {
+    const m = n.meals && n.meals[i];
+    if (m) {
+      mealsBlock += `{{MEAL_${i+1}}} = ${m.name} (${m.timing}) — ${m.desc} | ~${m.cals} kcal / ${m.protein}g protein\n`;
+    } else {
+      mealsBlock += `{{MEAL_${i+1}}} = Not used\n`;
+    }
+  }
+
+  // Weekly days block — full split per day with exercises
+  let daysBlock = '';
+  if (t.days && t.days.length) {
+    t.days.forEach((d, i) => {
+      daysBlock += `\n  Day ${d.num} — ${d.name} (As Day ${d.num})\n`;
+      daysBlock += `  Type    : ${d.type}\n`;
+      daysBlock += `  Focus   : ${d.workout}\n`;
+      if (d.exercises && d.exercises.length) {
+        daysBlock += `  Exercises:\n`;
+        daysBlock += `  #  | Exercise                | Warm-up | Sets | Reps  | Load  | Rest\n`;
+        daysBlock += `  ---+-------------------------+---------+------+-------+-------+-----\n`;
+        d.exercises.forEach(ex => {
+          const pad = (s, len) => String(s).padEnd(len);
+          daysBlock += `  ${pad(ex.num,2)} | ${pad(ex.name,23)} | ${pad(ex.warmup,7)} | ${pad(ex.sets,4)} | ${pad(ex.reps,5)} | ${pad(ex.load,5)} | ${ex.rest}\n`;
+        });
+      } else {
+        daysBlock += `  Exercises: Not filled\n`;
+      }
+      daysBlock += `  Cardio  : ${d.cardio}\n`;
+    });
+  } else {
+    for (let i = 1; i <= 7; i++) {
+      daysBlock += `\n  Day ${i} — ${DAY_NAMES[i-1]}: Missing\n`;
+    }
+  }
+
+  const supps = n.supps || ['None','None','None','None'];
+
+  const vars = `[CLIENT CORE]
+{{CLIENT_NAME}}     = ${safe(p.name)}
+{{CLIENT_SUBTITLE}} = ${subtitle}
+{{AGE}}             = ${miss(p.age)}
+{{GENDER}}          = ${miss(p.gender)}
+
+[BODY STATS]
+{{HEIGHT}}          = ${miss(p.height)} cm
+{{START_WEIGHT}}    = ${miss(p.currentWeight)} kg
+{{CURRENT_WEIGHT}}  = ${miss(p.currentWeight)} kg
+{{TARGET_WEIGHT}}   = ${miss(p.targetWeight)} kg
+{{TOTAL_CHANGE}}    = ${diffStr}
+{{PROGRAM_DURATION}}= 12 Weeks
+
+[GOAL SYSTEM]
+{{GOAL_TYPE}}       = ${miss(p.goalType)}
+{{ACTIVITY_LEVEL}}  = ${miss(p.activity)}
+{{WHY_START}}       = ${miss(p.motivation)}
+
+[TRAINING SYSTEM]
+{{WORKOUT_SPLIT}}   = ${miss(t.splitName)}
+{{TRAINING_DAYS}}   = ${t.trainingDays || miss(p.trainingDays)} days/week
+{{REST_DAYS}}       = ${t.restDays !== undefined ? t.restDays : (7 - parseInt(p.trainingDays || 0))} days/week
+{{ENVIRONMENT}}     = ${miss(p.environment)}
+{{EQUIPMENT}}       = ${miss(p.equipment)}
+{{SHEET_LINK}}      = ${miss(t.tableLink)}
+
+[SPLIT OVERVIEW — FULL PROGRAM]
+${daysBlock}
+[NUTRITION SYSTEM]
+{{DIET_NAME}}       = ${miss(n.dietName)}
+{{DIET_TYPE}}       = ${miss(n.dietType)}
+{{DIET_APPROACH}}   = ${miss(n.dietApproach)}
+{{DIET_DESC}}       = ${miss(n.dietDesc)}
+{{MEAL_COUNT}}      = ${mealCount || miss('')} meals/day
+
+[MEAL PLAN]
+${mealsBlock}
+[SUPPLEMENTS]
+{{SUPP_1}}          = ${supps[0]}
+{{SUPP_2}}          = ${supps[1]}
+{{SUPP_3}}          = ${supps[2]}
+{{SUPP_4}}          = ${supps[3]}
+
+[DAILY GUIDE]
+{{PRE_WORKOUT}}     = ${miss(n.preWorkout)}
+{{POST_WORKOUT}}    = ${miss(n.postWorkout)}
+{{HYDRATION}}       = ${miss(n.hydration)}
+{{SLEEP}}           = ${miss(n.sleep)}
+{{COACHING_NOTES}}  = ${miss(n.adherence)}
+
+[MEDICAL]
+{{MEDICAL}}         = ${miss(p.medical)}
+
+[PROGRESS TRACKING]
+{{WEIGH_IN_PROTOCOL}} = Weekly — Monday, fasted, same conditions
+{{REVIEW_CYCLE}}      = Every 4 weeks
+{{WEIGHT_LOG}}        = Track current vs target weekly`;
+
+  state.masterVars = vars;
+
+  const highlighted = vars
+    .replace(/(\[.+?\])/g, '<span class="var-section">$1</span>')
+    .replace(/({{.+?}})/g, '<span class="var-key">$1</span>')
+    .replace(/= (Missing)/g, '= <span class="var-missing">Missing</span>')
+    .replace(/= (Not used)/g, '= <span class="var-missing">Not used</span>');
+
+  document.getElementById('varsContent').innerHTML = highlighted;
+  document.getElementById('varsBox').style.display = 'block';
+  document.getElementById('varsBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  state.completedSteps.add(6);
+}
+
+// ════════════════════════════════════════════════════
+// STEP 7 — INJECT INTO PORTAL
+// ════════════════════════════════════════════════════
+function injectPortal() {
+  if (!state.masterVars) { showToast('Generate Master Variables first', 'var(--accent3)'); return; }
+
+  const p = state.profile;
+  const clientLine = p.name ? `Client: ${p.name} — ${p.goalType || 'Coaching'} Phase` : 'Client: [Unknown]';
+
+  const portalTemplate = `[SYSTEM MODE: STRICT VARIABLE ENGINE]
+[${clientLine}]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are a deterministic variable substitution engine inside the Mario Aziz Coaching Server.
+DO NOT generate. DO NOT rewrite. DO NOT interpret. DO NOT modify structure.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PORTAL INJECTION — VARIABLES MAP
+━━━━━━━━━━━━━━━━━━━━━━━
+
+${state.masterVars}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+HARD RULES
+━━━━━━━━━━━━━━━━━━━━━━━
+- No changes outside variables
+- No rephrasing or paraphrasing
+- No structural or formatting changes
+- No additions or deletions of any kind
+- No explanations or commentary
+- 1:1 exact substitution only
+- If any variable is marked "Missing", leave {{VARIABLE}} unchanged in output
+
+━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT INSTRUCTION
+━━━━━━━━━━━━━━━━━━━━━━━
+Return the final portal block with all {{VARIABLES}} replaced by their exact values listed above.
+Execute.`;
+
+  document.getElementById('portalContent').textContent = portalTemplate;
+  document.getElementById('portalBox').style.display = 'block';
+  document.getElementById('portalBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  state.completedSteps.add(7);
+
+  // Mark all completed steps in nav
+  document.querySelectorAll('.step-item').forEach(item => {
+    const s = parseInt(item.dataset.step);
+    if (state.completedSteps.has(s) && s !== state.currentStep) {
+      item.classList.add('done');
+      item.querySelector('.step-num').textContent = '✓';
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════════════
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function copyText(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.innerText || el.textContent;
+  const doCopy = () => {
+    showToast('Copied ✓');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(doCopy).catch(() => fallbackCopy(text, doCopy));
+  } else {
+    fallbackCopy(text, doCopy);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--accent)';
+  t.style.color = color ? '#fff' : '#0a0a0c';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function resetSystem() {
+  if (!confirm('Reset the entire system? All data will be cleared.')) return;
+  location.reload();
+}
+
+/* ══════════════════════════════════════════
+   EXERCISE LIST SYSTEM — Smart Selection
+   ══════════════════════════════════════════ */
+const EXERCISE_LISTS = {
+  "A": ["(Chest) Barbell Flat Bench Press", "(Chest) Barbell Incline Bench Press", "(Chest) Dumbbell Flat Bench Press", "(Chest) Dumbbell Incline Bench Press", "(Chest) Dumbbell Incline Bench Fly", "(Chest) Dumbbell Decline Bench Press", "(Chest) Machine Chest Press", "(Chest) Machine Butterfly", "(Chest) Cable Crossover (High Angle)", "(Chest) Cable Crossover (Low Angle)", "(Chest) Cable Chest Press (Seated)", "(Chest) Cable Flat Bench Fly", "(Chest) Cable Incline Bench Fly", "(Chest) Cable Incline Bench Press", "(Chest) Body Weight Push-Up", "(Chest) Body Weight Incline Push-Up", "(Chest) Body Weight Decline Push-Up", "(Chest) Body Weight Dip", "(Chest) Smith Machine Bench Press", "(Chest) Smith Machine Incline Bench Press", "(Chest) Machine Chest Press", "(Chest) Machine Incline Chest Press", "(Chest) Machine Decline Chest Press", "(Back) Cable Mag-Bar Lat Pull-Down", "(Back) Cable V-Bar Lat Pull-Down", "(Back) Cable Wide-Grip Lat Pull-Down", "(Back) Cable Row Mag-Bar (Seated)", "(Back) Cable V-Bar (Seated)", "(Back) Cable Wide-Grip (Seated)", "(Back) Barbell Bent Over Row", "(Back) Barbell Chest-Supported T-Bar Row", "(Back) Barbell Shrug", "(Back) Dumbbell Shrug", "(Back) Dumbbell Bent Over Row", "(Back) Machine Chest Supported Row", "(Back) Machine Back Extension", "(Back) Cable Pull Over", "(Back) Machine Shrug", "(Back) Weighted Pull-Up", "(Back) Back Extension ", "(Shoulders) Barbell Push Press", "(Shoulders) Barbell Seated Shoulder Press", "(Shoulders) Barbell Standing Shoulder Press", "(Shoulders) Barbell One-Arm Linear Jammer", "(Shoulders) Dumbbell Push Press", "(Shoulders) Dumbbell Front Raise", "(Shoulders) Dumbbell One-Arm Lateral Raise", "(Shoulders) Dumbbell Side Lateral Raise", "(Shoulders) Machine Lateral Raise", "(Shoulders) Machine Reverse Fly", "(Shoulders) Machine Shoulder Press", "(Shoulders) Cable Face Pull", "(Shoulders) Cable Front Raise", "(Shoulders) Cable Lateral Raise", "(Shoulders) Cable Rear Delt Fly", "(Shoulders) Smith Machine Shoulder Press", "(Triceps) Barbell Overhead Triceps Extension", "(Triceps) Cable Straight-Bar Triceps Push-Down", "(Triceps) Cable Rope Triceps Push-Down", "(Triceps) Cable One-Arm  Push-Down  ", "(Triceps) Cable Overhead Triceps Extension", "(Triceps) Dumbbell Overhead Triceps Extension", "(Triceps) Machine Triceps Extension", "(Triceps) Machine Assisted Dips (Triceps Variation)", "(Triceps) Body Weight Dips (Triceps Variation)", "(Biceps) Barbell Close-Grip Biceps Curl", "(Biceps) Barbell Regular-Grip Biceps Curl", "(Biceps) Barbell Reverse-Grip Biceps Curl", "(Biceps) Barbell Wide-Grip Biceps Curl", "(Biceps) Barbell Preacher Biceps Curl", "(Biceps) Cable Bar Biceps Curl", "(Biceps) Cable Incline Bench Biceps Curl", "(Biceps) Cable One-Arm Biceps Curl", "(Biceps) Cable Rope Biceps Curl", "(Biceps) Dumbbell Alternate Biceps Curl", "(Biceps) Dumbbell Incline Bench Biceps Curl", "(Biceps) Dumbbell Hammer Biceps Curl", "(Biceps) Dumbbell One-Arm Biceps Curl", "(Biceps) Dumbbell Preacher Biceps Curl", "(Biceps) Dumbbell Reverse-Grip Biceps Curl", "(Biceps) Machine Biceps Curl", "(Biceps) Machine Preacher Biceps Curl", "(Abs) Body Weight Ab Crunch", "(Abs) Body Weight Hanging Leg Raise", "(Abs) Body Weight Plank", "(Abs) Dumbbell Ab Twist", "(Abs) Machine Ab Crunch", "(Abs) Cable Knee", "(Abs) Weighted Plank", "(Abs) Barbell Wrist Curl", "(Quadriceps) Barbell Squat", "(Quadriceps) Barbell Jump Squat", "(Quadriceps)Barbell Step Up", "(Quadriceps) Dumbbell Body Weight Squat", "(Quadriceps) Dumbbell Goblet Squat", "(Quadriceps) Dumbbell Standing Lunge", "(Quadriceps) Addaction", "(Quadriceps) Abdaction", "(Quadriceps) Machine Hack Squat", "(Quadriceps) Machine Laying Leg Press", "(Quadriceps) Machine Leg Press", "(Quadriceps) Machine Seated Leg Press", "(Quadriceps) Body Weight Squat", "(Quadriceps) Body Weight Standing Lunge", "(Quadriceps)  Body Weight Step Up", "(Quadriceps) Body Weight Walking Lunge", "(Hamstrings) Barbell Deadlift", "(Hamstrings) Barbell Deadlifts from Blocks", "(Hamstrings) Barbell Deadlifts from Deficit", "(Hamstrings) Barbell Hip Thrust", "(Hamstrings) Barbell Sumo Deadlift", "(Hamstrings) Barbell Romanian Deadlift", "(Hamstrings) Body Weight Glute-Ham Raise", "(Hamstrings) Cable One-Legged Kickback", "(Hamstrings) Dumbbell Glute Bridge", "(Hamstrings) Dumbbell Hip Thrust", "(Hamstrings) Dumbbell Deadlift", "(Hamstrings) Machine Glute-Ham Raise", "(Hamstrings) Machine Laying Leg Curl", "(Calves) Barbell Calf Raise", "(Calves) Dumbbell Calf Raise", "(Calves) Machine Calf Extension (Seated)", "(Calves) Machine Calf Raise", "(Calves) Machine Calf Extension (Seated/Laying)"],
+  "B": ["(Chest) Push-ups (standard)", "(Chest) Push-ups (incline)", "(Chest) Push-ups (decline)", "(Chest) Push-ups (close-grip)", "(Chest) Wide-arm Push-ups", "(Chest) Archer Push-ups", "(Chest) Pseudo Planche Push-ups", "(Chest) Clapping Push-ups", "(Chest) Typewriter Push-ups", "(Chest) Wall Push-ups", "(Chest) Explosive Push-ups", "(Chest) Hindu Push-ups", "(Chest) Plyometric Push-ups", "(Shoulders) Pike Push-ups", "(Shoulders) Elevated Pike Push-ups", "(Shoulders) Wall Walks", "(Shoulders) Handstand Hold", "(Shoulders) Handstand Push-ups", "(Shoulders) Shoulder Taps", "(Shoulders) Arm Circles", "(Shoulders) Dive Bomber Push-ups", "(Shoulders) Lateral Arm Raises", "(Shoulders) Y-T-W Raises", "(Back) Superman Raises", "(Back) Reverse Snow Angels", "(Back) Bodyweight Rows", "(Back) Doorframe Rows", "(Back) Prone I-Y-T Lifts", "(Back) Arch Hold", "(Back) Swimmers", "(Biceps) Isometric Towel Curls", "(Biceps) Doorframe Rows (palms-up)", "(Biceps) Chin-ups", "(Biceps) Towel Rows", "(Triceps) Diamond Push-ups", "(Triceps) Triceps Dips", "(Triceps) Close-Grip Push-ups", "(Triceps) Cobra Push-ups", "(Triceps) Incline Triceps Extensions", "(Triceps) Bodyweight Triceps Extensions", "(Core) Planks", "(Core) Side Planks", "(Core) Plank Shoulder Taps", "(Core) L-Sit", "(Core) Hollow Body Hold", "(Core) Flutter Kicks", "(Core) Leg Raises", "(Core) Bicycle Crunches", "(Core) V-ups", "(Core) Mountain Climbers", "(Core) Dead Bugs", "(Core) Dragon Flags", "(Core) Russian Twists", "(Core) Seated Knee Tucks", "(Quadriceps) Step-ups", "(Quadriceps) Jump Squats", "(Quadriceps) Bodyweight Squats", "(Quadriceps) Split Squats", "(Quadriceps) Bulgarian Split Squats", "(Quadriceps) Wall Sit", "(Quadriceps) Sissy Squats", "(Glutes) Glute Bridges", "(Glutes) Hip Thrusts", "(Glutes) Single-leg Glute Bridges", "(Glutes) Pistol Squats", "(Glutes) Assisted Pistol Squats", "(Glutes) Curtsy Lunges", "(Glutes) Lateral Lunges", "(Hamstrings) Hamstring Slides", "(Hamstrings) Good Mornings", "(Hamstrings) Glute Marches", "(Hamstrings) Single-Leg Romanian Deadlifts", "(Calves) Standing Calf Raises", "(Calves) Seated Calf Raises", "(Calves) Explosive Calf Jumps", "(Calves) Calf Raise"],
+  "C": ["(Chest) Wall Push-ups", "(Chest) Push-ups", "(Chest) Knee Push-ups", "(Shoulders) Incline Pike Push-ups", "(Shoulders) Wall Shoulder Taps", "(Shoulders) Elevated Arm Circles (seated or supported)", "(Shoulders) Seated Lateral Arm Raises", "(Shoulders) Supported Y-T-W Raises", "(Back) Incline Bodyweight Rows", "(Back) Doorframe Rows (bent knees)", "(Back) Prone Arm Lifts", "(Back) Arch Hold (shorter time)", "(Back) Swimmers (slower pace)", "(Biceps) Assisted Towel Curls", "(Biceps) Incline Doorframe Rows", "(Biceps) Chin-ups (band-assisted)", "(Biceps) Incline Towel Rows", "(Triceps) Incline Diamond Push-ups", "(Triceps) Bench Dips (knees bent)", "(Triceps) Incline Close-Grip Push-ups", "(Triceps) Incline Cobra Push-ups", "(Triceps) Wall Triceps Extensions", "(Triceps) Incline Bodyweight Triceps Extensions", "(Core) Knee Planks", "(Core) Side Knee Planks", "(Core) Knee Plank Shoulder Taps", "(Core) Tucked L-Sit", "(Core) Hollow Tuck Hold", "(Core) Flutter Kicks (higher legs)", "(Core) Bent-Knee Leg Raises", "(Core) Slow Bicycle Crunches", "(Core) Tuck-ups", "(Core) Slow Mountain Climbers", "(Core) Arm-Only Dead Bugs", "(Core) Negative Dragon Flags", "(Core) Russian Twists (feet on ground)", "(Core) Seated Alternating Knee Lifts", "(Quadriceps) Low Step-ups", "(Quadriceps) Squat to Toes", "(Quadriceps) Assisted Squats", "(Quadriceps) Shallow Split Squats", "(Quadriceps) Rear-Foot Elevated Lunge (low step)", "(Quadriceps) Wall Lean", "(Quadriceps) Partial Sissy Squats", "(Glutes) Partial Glute Bridges", "(Glutes) Glute Bridges (on floor)", "(Glutes) Single-leg Glute Bridge (assisted)", "(Glutes) Box Pistol Squats", "(Glutes) Shallow Curtsy Lunges", "(Glutes) Supported Lateral Lunges", "(Hamstrings) Partial Hamstring Slides", "(Hamstrings) Wall Hinge Drill", "(Hamstrings) Glute Bridge Hold with Leg Raise", "(Hamstrings) Supported Single-Leg Romanian Deadlifts", "(Calves) Standing Calf Raises (with support)", "(Calves) Seated Calf Raises (no weight)", "(Calves) Calf Raise to Toes (no jump)", "(Abs) Hanging Knee Raise", "(Abs) Reverse Crunch (no weight)", "(Abs) Sit-Up to Reach", "(Abs) Bodyweight Kneeling Crunch", "(Abs) Standing Band Lift", "(Abs) Hanging Bent-Knee Raise", "(Abs) Knee Plank", "(Abs) Russian Twist (no weight)", "(Abs) Seated Crunch (no machine)", "(Abs) Standard Plank", "(Quadriceps) Goblet Squat", "(Quadriceps) Bodyweight Jump Squat", "(Quadriceps) Dumbbell Step-Up", "(Quadriceps) Bodyweight Squat", "(Quadriceps) Wall-Supported Squat", "(Quadriceps) Bodyweight Lunge", "(Quadriceps) Static Lunge", "(Quadriceps) Step-up to Low Surface", "(Quadriceps) Leg Press Machine (lighter weight)", "(Quadriceps) Machine Leg Press (partial range)", "(Hamstrings) Dumbbell Romanian Deadlift", "(Hamstrings) Rack Pulls", "(Hamstrings) Standard Barbell Deadlift", "(Hamstrings) Hip Thrust", "(Hamstrings) Sumo Deadlift", "(Hamstrings) Assisted Glute-Ham Raise", "(Hamstrings) Band Kickback", "(Hamstrings) Bodyweight Glute Bridge", "(Hamstrings) Bodyweight Hip Thrust", "(Hamstrings) Dumbbell Good Morning", "(Hamstrings) Machine Glute-Ham Raise (partial)", "(Hamstrings) Machine Leg Curl (light)", "(Calves) Calf Raise", "(Calves) Bodyweight Calf Raise", "(Calves) Seated Calf Raise (no weight)", "(Calves) Standing Calf Raise (no machine)"]
+};
+
+function buildExerciseCell(dayN, rowR) {
+  var listId = "day" + dayN + "_ex" + rowR + "_list";
+  var nameId = "day" + dayN + "_ex" + rowR + "_name";
+  return '<div class="ex-smart-wrap">' +
+    '<select class="ex-list-sel" id="' + listId + '" onchange="updateExerciseDropdown(\'' + listId + '\',\'' + nameId + '\')" title="List">' +
+      '<option value="">—</option>' +
+      '<option value="A">A</option>' +
+      '<option value="B">B</option>' +
+      '<option value="C">C</option>' +
+    '</select>' +
+    '<select class="ex-name-sel" id="' + nameId + '">' +
+      '<option value="">Select exercise…</option>' +
+    '</select>' +
+  '</div>';
+}
+
+function updateExerciseDropdown(listId, nameId) {
+  var listSel = document.getElementById(listId);
+  var nameSel = document.getElementById(nameId);
+  if (!listSel || !nameSel) return;
+  var key = listSel.value;
+  var prevVal = nameSel.value;
+  nameSel.innerHTML = '<option value="">Select exercise…</option>';
+  if (key && EXERCISE_LISTS[key]) {
+    EXERCISE_LISTS[key].forEach(function(ex) {
+      var opt = document.createElement('option');
+      opt.value = ex;
+      opt.textContent = ex;
+      nameSel.appendChild(opt);
+    });
+    if (prevVal && EXERCISE_LISTS[key].includes(prevVal)) nameSel.value = prevVal;
+  }
+}
+/* ══════════════════════════════════════════ */
+
+</script>
+</body>
+</html>
