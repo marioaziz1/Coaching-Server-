@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mario Aziz Coaching Server</title>
+<title>Mario Aziz — Prompt Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root {
     --bg: #0a0a0c;
@@ -68,11 +67,14 @@
     letter-spacing: 0.03em;
     color: var(--text);
   }
-  .sys-title span {
-    color: var(--accent);
+  .sys-title span { color: var(--accent); }
+  .sys-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
   }
   .sys-status {
-    margin-left: auto;
     font-family: var(--mono);
     font-size: 11px;
     color: var(--text-muted);
@@ -90,32 +92,93 @@
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+  /* ─── SMART TOGGLE ─── */
+  .smart-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-left: 18px;
+    border-left: 1px solid var(--border);
+  }
+  .smart-toggle-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .smart-toggle {
+    position: relative;
+    width: 44px; height: 22px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .smart-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .smart-track {
+    position: absolute; inset: 0;
+    border-radius: 11px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    transition: all 0.2s;
+  }
+  .smart-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .smart-toggle input:checked + .smart-track {
+    background: rgba(200,255,87,0.15);
+    border-color: rgba(200,255,87,0.5);
+  }
+  .smart-toggle input:checked + .smart-track::after {
+    left: 23px;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(200,255,87,0.5);
+  }
+  .smart-pill {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: var(--surface3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .smart-pill.on {
+    background: rgba(200,255,87,0.1);
+    color: var(--accent);
+    border-color: rgba(200,255,87,0.3);
+  }
+
   /* ─── STEP NAV ─── */
   .step-nav {
-    padding: 16px 40px;
+    padding: 14px 40px;
     display: flex;
     gap: 2px;
     align-items: center;
     border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
     background: var(--surface);
   }
-  .step-nav::-webkit-scrollbar { display: none; }
   .step-item {
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    opacity: 0.3;
+    opacity: 0.35;
     transition: opacity 0.2s;
-    white-space: nowrap;
     padding: 4px 8px;
     border-radius: 4px;
   }
   .step-item.active { opacity: 1; background: rgba(200,255,87,0.06); }
   .step-item.done { opacity: 0.6; }
-  .step-item:hover:not(.active) { opacity: 0.75; }
+  .step-item:hover:not(.active) { opacity: 0.7; }
   .step-num {
     width: 20px; height: 20px;
     border-radius: 50%;
@@ -148,28 +211,24 @@
   .step-item.active .step-label { color: var(--accent); }
   .step-item.done .step-label { color: rgba(200,255,87,0.6); }
   .step-sep {
-    width: 20px; height: 1px;
+    width: 28px; height: 1px;
     background: var(--border);
     flex-shrink: 0;
-    margin: 0 2px;
+    margin: 0 4px;
   }
 
-  /* ─── MAIN LAYOUT ─── */
+  /* ─── MAIN ─── */
   .main-wrap {
     max-width: 840px;
     margin: 0 auto;
     padding: 52px 40px 120px;
   }
-
-  /* ─── SECTIONS ─── */
-  .section {
-    display: none;
-    animation: fadeIn 0.25s ease;
-  }
+  .section { display: none; animation: fadeIn 0.25s ease; }
   .section.active { display: block; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-  .section-header { margin-bottom: 44px; }
+  /* ─── SECTION HEADER ─── */
+  .section-header { margin-bottom: 40px; }
   .section-tag {
     font-family: var(--mono);
     font-size: 10px;
@@ -201,7 +260,29 @@
     line-height: 1.65;
   }
 
-  /* ─── FORM ELEMENTS ─── */
+  /* ─── FORM ─── */
+  .block-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .block-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .block-divider {
+    margin: 28px 0;
+    height: 1px;
+    background: var(--border);
+  }
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -209,13 +290,8 @@
     margin-bottom: 14px;
   }
   .form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
-  .form-grid.col1 { grid-template-columns: 1fr; }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  .form-grid.col1  { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
   .field.span2 { grid-column: span 2; }
   .field.span3 { grid-column: span 3; }
 
@@ -230,12 +306,7 @@
     gap: 4px;
   }
   label .req { color: var(--accent3); }
-  label .opt {
-    color: var(--text-dim);
-    font-size: 9px;
-    letter-spacing: 0.04em;
-    font-weight: 400;
-  }
+  label .opt { color: var(--text-dim); font-size: 9px; letter-spacing: 0.04em; }
 
   input[type=text], input[type=number], select, textarea {
     background: var(--surface);
@@ -258,313 +329,6 @@
   input::placeholder, textarea::placeholder { color: var(--text-dim); }
   select option { background: #18181d; }
   textarea { resize: vertical; min-height: 80px; }
-
-  /* ─── BLOCK DIVIDER ─── */
-  .block-divider {
-    margin: 30px 0;
-    height: 1px;
-    background: var(--border);
-  }
-  .block-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .block-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ─── MEAL CARD ─── */
-  .meal-card {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 10px;
-    transition: border-color 0.2s;
-  }
-  .meal-card:hover { border-color: rgba(200,255,87,0.15); }
-  .meal-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .meal-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .meal-opt-badge {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 3px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  /* ─── DAY CARD ─── */
-  .day-card {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    margin-bottom: 12px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .day-card:hover { border-color: rgba(200,255,87,0.15); }
-  .day-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .day-card-title {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .day-card-num {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-  .day-card-name {
-    font-family: var(--sans);
-    font-size: 13px;
-    color: var(--text);
-    font-weight: 500;
-  }
-  .day-card-body {
-    padding: 0 20px 20px;
-    border-top: 1px solid var(--border);
-  }
-  .day-card-body > .form-grid { margin-top: 16px; }
-  .day-rest-note {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-  }
-  .day-cardio-row {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .day-cardio-row label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  /* ─── EXERCISE TABLE ─── */
-  .exer-table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-top: 4px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border2) transparent;
-  }
-  .exer-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 620px;
-  }
-  .exer-table thead tr {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border2);
-  }
-  .exer-table th {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 9px 10px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  .exer-table td {
-    padding: 4px 6px;
-    border-bottom: 1px solid var(--border);
-  }
-  .exer-table tbody tr:last-child td { border-bottom: none; }
-  .exer-table tbody tr:hover { background: rgba(200,255,87,0.02); }
-  .exer-table td input[type=text] {
-    background: transparent;
-    border: none;
-    padding: 6px 6px;
-    font-size: 12px;
-    border-radius: 3px;
-    min-width: 0;
-  }
-  .exer-table td input[type=text]:focus {
-    background: var(--surface2);
-    border: 1px solid rgba(200,255,87,0.3);
-    box-shadow: none;
-  }
-  .exer-table td:nth-child(2) input { min-width: 140px; }
-  .exer-table td:nth-child(n+3) input { min-width: 60px; width: 100%; }
-  .exer-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    text-align: center;
-    width: 28px;
-  }
-
-  /* ─── DAY ROW (legacy — keep for fallback) ─── */
-  .day-row {
-    display: grid;
-    grid-template-columns: 90px 1fr 1fr 150px;
-    gap: 12px;
-    align-items: start;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .day-row:last-child { border-bottom: none; }
-  .day-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-muted);
-    padding-top: 10px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .day-tag .day-name {
-    display: block;
-    color: var(--text-dim);
-    font-size: 9px;
-    margin-top: 2px;
-  }
-
-  /* ─── PROMPT / OUTPUT BOXES ─── */
-  .prompt-box, .vars-box {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 24px;
-  }
-  .output-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface2);
-  }
-  .output-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .output-label::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent2);
-    box-shadow: 0 0 6px var(--accent2);
-  }
-  .output-content {
-    padding: 22px;
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.85;
-    color: #a0a0c0;
-    white-space: pre-wrap;
-    max-height: 420px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border2) transparent;
-  }
-
-  /* ─── VARIABLE BOX ─── */
-  .vars-content {
-    padding: 22px;
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 2;
-    color: #a0a0c0;
-    white-space: pre-wrap;
-    max-height: 520px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border2) transparent;
-  }
-  .var-key { color: var(--accent2); }
-  .var-section { color: var(--accent); font-weight: 500; letter-spacing: 0.05em; }
-  .var-missing { color: var(--accent3); }
-
-  /* ─── PORTAL BOX ─── */
-  .portal-box {
-    background: #0c0c0f;
-    border: 1px solid rgba(200,255,87,0.25);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 24px;
-    box-shadow: 0 0 40px rgba(200,255,87,0.04), 0 0 0 1px rgba(200,255,87,0.04);
-  }
-  .portal-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid rgba(200,255,87,0.15);
-    background: rgba(200,255,87,0.02);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .portal-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .portal-label::before {
-    content: '◆';
-    font-size: 8px;
-  }
-  .portal-content {
-    padding: 24px;
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.95;
-    color: #b0b0d0;
-    white-space: pre-wrap;
-    max-height: 620px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border2) transparent;
-  }
 
   /* ─── BUTTONS ─── */
   .btn {
@@ -611,13 +375,6 @@
     border: 1px solid rgba(255,124,87,0.25);
   }
   .btn-danger:hover { background: rgba(255,124,87,0.16); }
-  .btn-outline {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid rgba(200,255,87,0.3);
-  }
-  .btn-outline:hover { background: rgba(200,255,87,0.06); }
-
   .btn-row {
     display: flex;
     gap: 12px;
@@ -626,69 +383,99 @@
     flex-wrap: wrap;
   }
 
-  /* ─── INSTRUCTION BLOCK ─── */
-  .instruction {
-    background: rgba(87,200,255,0.04);
-    border: 1px solid rgba(87,200,255,0.12);
-    border-radius: 6px;
-    padding: 14px 18px;
-    margin-bottom: 28px;
-    font-size: 12px;
-    color: var(--accent2);
-    font-family: var(--mono);
-    line-height: 1.75;
-    opacity: 0.9;
+  /* ─── PROMPT OUTPUT BOXES ─── */
+  .prompt-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 22px;
   }
-  .instruction strong { color: #d0f0ff; }
-
-  /* ─── MEAL COUNT SELECTOR ─── */
-  .meal-count-bar {
+  .prompt-box + .prompt-box { margin-top: 16px; }
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
     display: flex;
-    gap: 8px;
     align-items: center;
-    margin-bottom: 22px;
+    justify-content: space-between;
+    background: var(--surface2);
   }
-  .meal-count-label {
+  .output-label {
     font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-right: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .meal-count-btn {
-    width: 32px; height: 32px;
-    border-radius: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    color: var(--text-muted);
+  .output-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 6px var(--accent2);
+  }
+  .output-label.nutrition::before { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .output-label.training::before  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .output-content {
+    padding: 22px;
     font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-  }
-  .meal-count-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .meal-count-btn.active {
-    background: rgba(200,255,87,0.1);
-    border-color: var(--accent);
-    color: var(--accent);
+    font-size: 12px;
+    line-height: 1.85;
+    color: #a0a0c0;
+    white-space: pre-wrap;
+    max-height: 460px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
   }
 
-  /* ─── SUPPLEMENT ROW ─── */
-  .supp-row {
+  /* ─── PROFILE SUMMARY ─── */
+  .profile-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 28px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .pc-item { display: flex; flex-direction: column; gap: 3px; }
+  .pc-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .pc-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ─── SMART BADGE ON OUTPUT ─── */
+  .smart-badge-output {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(200,255,87,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(200,255,87,0.25);
+    font-weight: 500;
   }
 
   /* ─── TOAST ─── */
   .toast {
     position: fixed;
-    bottom: 28px;
-    right: 28px;
+    bottom: 28px; right: 28px;
     background: var(--accent);
     color: #0a0a0c;
     font-family: var(--mono);
@@ -705,180 +492,71 @@
   }
   .toast.show { opacity: 1; transform: none; }
 
-  /* ─── STEP COMPLETE BANNER ─── */
-  .step-complete {
-    background: rgba(200,255,87,0.05);
-    border: 1px solid rgba(200,255,87,0.2);
-    border-radius: 6px;
-    padding: 12px 18px;
-    margin-top: 20px;
-    display: none;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-  }
-  .step-complete.visible { display: flex; }
-  .step-complete::before { content: '✓'; font-size: 13px; }
-
-  /* ─── PROFILE SUMMARY CARD ─── */
-  .profile-summary {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    padding: 20px 24px;
-    margin-bottom: 28px;
-    display: none;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .profile-summary.visible { display: grid; }
-  .ps-item { display: flex; flex-direction: column; gap: 4px; }
-  .ps-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .ps-val {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text);
-    font-weight: 500;
-  }
-
   /* ─── RESPONSIVE ─── */
   @media (max-width: 640px) {
     .main-wrap { padding: 32px 20px 100px; }
-    .sys-header { padding: 14px 20px; }
+    .sys-header { padding: 14px 20px; gap: 10px; }
     .step-nav { padding: 12px 20px; }
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid.cols3 { grid-template-columns: 1fr; }
+    .form-grid, .form-grid.cols3 { grid-template-columns: 1fr; }
     .field.span2, .field.span3 { grid-column: span 1; }
-    .day-row { grid-template-columns: 70px 1fr; }
-    .day-row > *:nth-child(n+3) { grid-column: 2; }
-    .supp-row { grid-template-columns: 1fr 1fr; }
+    .profile-card { grid-template-columns: 1fr 1fr; }
     .section-title { font-size: 24px; }
-    .profile-summary { grid-template-columns: 1fr 1fr; }
+    .smart-toggle-label { display: none; }
   }
-
-  /* ─── EXERCISE SMART SELECTION ─── */
-  .ex-smart-wrap {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    min-width: 230px;
-  }
-  .ex-list-sel {
-    flex: 0 0 34px;
-    width: 34px;
-    padding: 5px 0;
-    font-size: 10px;
-    font-family: var(--mono);
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    color: var(--accent);
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  .ex-list-sel:focus {
-    outline: none;
-    border-color: rgba(200,255,87,0.6);
-  }
-  .ex-name-sel {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 5px 6px;
-    font-size: 12px;
-    font-family: var(--sans);
-    background: transparent;
-    border: none;
-    color: var(--text);
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .ex-name-sel:focus {
-    background: var(--surface2);
-    border: 1px solid rgba(200,255,87,0.3);
-    outline: none;
-  }
-  .ex-name-sel option { background: #18181d; color: var(--text); }
-  .exer-table td:nth-child(2) { min-width: 250px; padding: 3px 4px; }
-
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
+<!-- ═══════════════════════════
      HEADER
-═══════════════════════════════════════════ -->
+═══════════════════════════ -->
 <header class="sys-header">
-  <span class="sys-badge">Server</span>
+  <span class="sys-badge">Prompt Gen</span>
   <span class="sys-title">Mario Aziz <span>Coaching</span></span>
-  <div class="sys-status">
-    <span class="status-dot"></span>
-    <span id="statusText">Step 1 of 7</span>
+  <div class="sys-right">
+    <div class="sys-status">
+      <span class="status-dot"></span>
+      <span id="statusText">Step 1 of 2</span>
+    </div>
+    <div class="smart-toggle-wrap">
+      <span class="smart-toggle-label">Smart Mode</span>
+      <label class="smart-toggle">
+        <input type="checkbox" id="smartToggle" checked onchange="onSmartToggle()">
+        <span class="smart-track"></span>
+      </label>
+      <span class="smart-pill on" id="smartPill">ON</span>
+    </div>
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════
+<!-- ═══════════════════════════
      STEP NAV
-═══════════════════════════════════════════ -->
-<nav class="step-nav" id="stepNav">
-  <div class="step-item active" data-step="1" onclick="tryGoToStep(1)">
+═══════════════════════════ -->
+<nav class="step-nav">
+  <div class="step-item active" data-step="1" onclick="navTo(1)">
     <div class="step-num">1</div>
-    <span class="step-label">Client Profile</span>
+    <span class="step-label">Client Input</span>
   </div>
   <div class="step-sep"></div>
-  <div class="step-item" data-step="2" onclick="tryGoToStep(2)">
+  <div class="step-item" data-step="2" onclick="navTo(2)">
     <div class="step-num">2</div>
-    <span class="step-label">Nutrition Prompt</span>
-  </div>
-  <div class="step-sep"></div>
-  <div class="step-item" data-step="3" onclick="tryGoToStep(3)">
-    <div class="step-num">3</div>
-    <span class="step-label">Nutrition File</span>
-  </div>
-  <div class="step-sep"></div>
-  <div class="step-item" data-step="4" onclick="tryGoToStep(4)">
-    <div class="step-num">4</div>
-    <span class="step-label">Training Prompt</span>
-  </div>
-  <div class="step-sep"></div>
-  <div class="step-item" data-step="5" onclick="tryGoToStep(5)">
-    <div class="step-num">5</div>
-    <span class="step-label">Training File</span>
-  </div>
-  <div class="step-sep"></div>
-  <div class="step-item" data-step="6" onclick="tryGoToStep(6)">
-    <div class="step-num">6</div>
-    <span class="step-label">Master Variables</span>
-  </div>
-  <div class="step-sep"></div>
-  <div class="step-item" data-step="7" onclick="tryGoToStep(7)">
-    <div class="step-num">7</div>
-    <span class="step-label">Inject Portal</span>
+    <span class="step-label">Prompt Output</span>
   </div>
 </nav>
 
 <div class="main-wrap">
 
-<!-- ═══════════════════════════════════════════
-     STEP 1 — CLIENT PROFILE
-═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════
+     STEP 1 — CLIENT INPUT
+═══════════════════════════ -->
 <div class="section active" id="step1">
   <div class="section-header">
     <div class="section-tag">Step 01</div>
-    <h1 class="section-title">Client Profile</h1>
-    <p class="section-desc">Enter client data. Fields marked <span style="color:var(--accent3)">*</span> are required. All others are optional — leave blank to use fallback values.</p>
+    <h1 class="section-title">Client Input</h1>
+    <p class="section-desc">Enter client data. Fields marked <span style="color:var(--accent3)">*</span> are required. All others are optional.</p>
   </div>
 
+  <!-- Identity -->
   <div class="block-label">Identity</div>
   <div class="form-grid">
     <div class="field span2">
@@ -963,7 +641,7 @@
   <div class="form-grid col1">
     <div class="field">
       <label>Equipment Access <span class="opt">(optional)</span></label>
-      <input type="text" id="p_equipment" placeholder="e.g. Barbells, dumbbells, squat rack, cable machine, resistance bands">
+      <input type="text" id="p_equipment" placeholder="e.g. Barbells, dumbbells, squat rack, cables, resistance bands">
     </div>
   </div>
 
@@ -983,9 +661,9 @@
       <input type="number" id="p_budget" placeholder="e.g. 500">
     </div>
     <div class="field">
-      <label>Meals Per Day <span class="opt">(optional — set in Step 3)</span></label>
+      <label>Meals Per Day <span class="opt">(optional)</span></label>
       <select id="p_meals_per_day">
-        <option value="">— Select or skip —</option>
+        <option value="">— Select —</option>
         <option>1</option><option>2</option><option>3</option>
         <option>4</option><option>5</option>
       </select>
@@ -1006,541 +684,123 @@
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="completeStep1()">
-      Confirm Profile →
+    <button class="btn btn-primary" onclick="generatePrompts()">
+      ⚡ Generate Prompts →
     </button>
-    <button class="btn btn-danger" onclick="resetSystem()" style="margin-left:auto">⟲ Reset</button>
+    <button class="btn btn-danger" onclick="resetAll()" style="margin-left:auto">⟲ Reset</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     STEP 2 — NUTRITION PROMPT
-═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════
+     STEP 2 — PROMPT OUTPUT
+═══════════════════════════ -->
 <div class="section" id="step2">
   <div class="section-header">
     <div class="section-tag">Step 02</div>
-    <h1 class="section-title">Nutrition Engine</h1>
-    <p class="section-desc">Generate a tailored AI prompt from the client profile. Copy and use in Claude or ChatGPT, then return.</p>
+    <h1 class="section-title">Prompt Output</h1>
+    <p class="section-desc">Copy each prompt and paste into Claude or ChatGPT. Both prompts are generated from the same client profile.</p>
   </div>
 
-  <div id="profileSummary2" class="profile-summary"></div>
+  <!-- Profile Summary -->
+  <div class="profile-card" id="profileCard"></div>
 
-  <div class="instruction">
-    <strong>WORKFLOW:</strong> Click Generate Prompt → Copy it → Paste into Claude / ChatGPT → Receive the meal plan → Return here → Proceed to Step 3 to input the results.
-  </div>
-
-  <div class="btn-row" style="margin-top:0">
-    <button class="btn btn-primary" onclick="generateNutritionPrompt()">
-      Generate Nutrition Prompt
-    </button>
-  </div>
-
-  <div class="prompt-box" id="nutritionPromptBox" style="display:none">
+  <!-- Nutrition Prompt -->
+  <div class="prompt-box">
     <div class="output-header">
-      <span class="output-label">Nutrition Prompt — Ready to Copy</span>
-      <button class="btn btn-copy" onclick="copyText('nutritionPromptText', this)">Copy Prompt</button>
+      <span class="output-label nutrition">Nutrition Prompt</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="smart-badge-output" id="nutBadge">Smart</span>
+        <button class="btn btn-copy" onclick="copyPrompt('nutPromptText', this)">Copy</button>
+      </div>
     </div>
-    <div class="output-content" id="nutritionPromptText"></div>
+    <div class="output-content" id="nutPromptText"></div>
   </div>
 
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
-    <button class="btn btn-primary" onclick="goToStep(3)">Used AI — Proceed →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     STEP 3 — NUTRITION CLIENT FILE
-═══════════════════════════════════════════ -->
-<div class="section" id="step3">
-  <div class="section-header">
-    <div class="section-tag">Step 03</div>
-    <h1 class="section-title">Nutrition Client File</h1>
-    <p class="section-desc">Input the AI-generated meal plan into structured fields. Only Diet Name and Type are required.</p>
-  </div>
-
-  <div class="block-label">Diet Overview</div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Diet Name <span class="req">*</span></label>
-      <input type="text" id="n_diet_name" placeholder="e.g. High-Protein Fat Loss Plan">
-    </div>
-    <div class="field">
-      <label>Diet Type <span class="req">*</span></label>
-      <select id="n_diet_type">
-        <option value="">— Select —</option>
-        <option>Cutting</option>
-        <option>Maintenance</option>
-        <option>Surplus</option>
-        <option>Diabetic-Friendly</option>
-        <option>Performance</option>
-      </select>
-    </div>
-    <div class="field span2">
-      <label>Diet Description <span class="opt">(optional)</span></label>
-      <input type="text" id="n_diet_desc" placeholder="e.g. 1,800 kcal/day, 160g protein, moderate carbs, minimal processed food">
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Meal Plan</div>
-
-  <div class="meal-count-bar">
-    <span class="meal-count-label">Meals per day:</span>
-    <button class="meal-count-btn active" data-count="1" onclick="setMealCount(1)">1</button>
-    <button class="meal-count-btn" data-count="2" onclick="setMealCount(2)">2</button>
-    <button class="meal-count-btn" data-count="3" onclick="setMealCount(3)">3</button>
-    <button class="meal-count-btn" data-count="4" onclick="setMealCount(4)">4</button>
-    <button class="meal-count-btn" data-count="5" onclick="setMealCount(5)">5</button>
-  </div>
-
-  <div id="mealsContainer"></div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Diet Approach</div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Diet Approach Type <span class="opt">(optional)</span></label>
-      <select id="n_diet_approach">
-        <option value="">— Select —</option>
-        <option>Balance</option>
-        <option>Low Carb</option>
-        <option>Carb Cycle</option>
-        <option>Keto</option>
-        <option>PSMF</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Supplements <span style="font-size:9px;color:var(--text-dim);text-transform:none;letter-spacing:0">(all optional)</span></div>
-  <div class="supp-row">
-    <div class="field">
-      <label>Supp 1</label>
-      <input type="text" id="n_supp1" placeholder="e.g. Whey 30g">
-    </div>
-    <div class="field">
-      <label>Supp 2</label>
-      <input type="text" id="n_supp2" placeholder="e.g. Creatine 5g">
-    </div>
-    <div class="field">
-      <label>Supp 3</label>
-      <input type="text" id="n_supp3" placeholder="e.g. Vitamin D">
-    </div>
-    <div class="field">
-      <label>Supp 4</label>
-      <input type="text" id="n_supp4" placeholder="e.g. Omega-3">
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Custom Instructions <span style="font-size:9px;color:var(--text-dim);text-transform:none;letter-spacing:0">(all optional)</span></div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Pre-Workout</label>
-      <input type="text" id="n_pre_workout" placeholder="e.g. Meal 1–2 hrs before training">
-    </div>
-    <div class="field">
-      <label>Post-Workout</label>
-      <input type="text" id="n_post_workout" placeholder="e.g. Protein shake within 30 min">
-    </div>
-    <div class="field">
-      <label>Hydration</label>
-      <input type="text" id="n_hydration" placeholder="e.g. Min 3L water/day">
-    </div>
-    <div class="field">
-      <label>Sleep</label>
-      <input type="text" id="n_sleep" placeholder="e.g. 7–9 hrs/night">
-    </div>
-    <div class="field span2">
-      <label>Coaching Notes</label>
-      <input type="text" id="n_adherence" placeholder="e.g. Weigh in every Monday morning fasted, log meals daily">
-    </div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-    <button class="btn btn-primary" onclick="completeStep3()">Confirm Nutrition File →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     STEP 4 — TRAINING PROMPT
-═══════════════════════════════════════════ -->
-<div class="section" id="step4">
-  <div class="section-header">
-    <div class="section-tag">Step 04</div>
-    <h1 class="section-title">Training System</h1>
-    <p class="section-desc">Generate a 12-week training prompt tailored to the client's goal, equipment, and limitations.</p>
-  </div>
-
-  <div id="profileSummary4" class="profile-summary"></div>
-
-  <div class="instruction">
-    <strong>WORKFLOW:</strong> Click Generate Prompt → Copy → Paste into Claude / ChatGPT → Receive 12-week program → Return to Step 5 to input the structure.
-  </div>
-
-  <div class="btn-row" style="margin-top:0">
-    <button class="btn btn-primary" onclick="generateTrainingPrompt()">
-      Generate Training Prompt
-    </button>
-  </div>
-
-  <div class="prompt-box" id="trainingPromptBox" style="display:none">
+  <!-- Training Prompt -->
+  <div class="prompt-box">
     <div class="output-header">
-      <span class="output-label">Training Prompt — Ready to Copy</span>
-      <button class="btn btn-copy" onclick="copyText('trainingPromptText', this)">Copy Prompt</button>
+      <span class="output-label training">Training Prompt</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="smart-badge-output" id="trainBadge">Smart</span>
+        <button class="btn btn-copy" onclick="copyPrompt('trainPromptText', this)">Copy</button>
+      </div>
     </div>
-    <div class="output-content" id="trainingPromptText"></div>
+    <div class="output-content" id="trainPromptText"></div>
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
-    <button class="btn btn-primary" onclick="goToStep(5)">Used AI — Proceed →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     STEP 5 — TRAINING CLIENT FILE
-═══════════════════════════════════════════ -->
-<div class="section" id="step5">
-  <div class="section-header">
-    <div class="section-tag">Step 05</div>
-    <h1 class="section-title">Training Client File</h1>
-    <p class="section-desc">Input the AI-generated program structure. Only the split name is required.</p>
-  </div>
-
-  <div class="block-label">Split Overview</div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Workout Split Name <span class="req">*</span></label>
-      <input type="text" id="t_split_name" placeholder="e.g. Upper / Lower, PPL, Full Body">
-    </div>
-    <div class="field">
-      <label>Workout Sheet / Reference Link <span class="opt">(optional)</span></label>
-      <input type="text" id="t_table_link" placeholder="e.g. Google Sheets URL or 'See Attached PDF'">
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Weekly Structure</div>
-
-  <div id="weeklyDays"></div>
-
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(4)">← Back</button>
-    <button class="btn btn-primary" onclick="completeStep5()">Confirm Training File →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     STEP 6 — MASTER VARIABLES
-═══════════════════════════════════════════ -->
-<div class="section" id="step6">
-  <div class="section-header">
-    <div class="section-tag">Step 06</div>
-    <h1 class="section-title">Master Variables</h1>
-    <p class="section-desc">All client data compiled into a structured variable map. Ready for portal injection.</p>
-  </div>
-
-  <div class="instruction">
-    <strong>HOW IT WORKS:</strong> This generates a clean <code style="color:var(--accent2)">{{VARIABLE}}</code> map from all steps. Missing values are flagged. Copy and use directly in any template system.
-  </div>
-
-  <div class="btn-row" style="margin-top:0">
-    <button class="btn btn-primary" onclick="generateMasterVariables()">
-      Generate Master Variables
-    </button>
-  </div>
-
-  <div class="vars-box" id="varsBox" style="display:none">
-    <div class="output-header">
-      <span class="output-label">Master Variables Map — Complete</span>
-      <button class="btn btn-copy" onclick="copyText('varsContent', this)">Copy All</button>
-    </div>
-    <div class="vars-content" id="varsContent"></div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(5)">← Back</button>
-    <button class="btn btn-primary" onclick="goToStep(7)">Proceed to Portal →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     STEP 7 — INJECT INTO PORTAL
-═══════════════════════════════════════════ -->
-<div class="section" id="step7">
-  <div class="section-header">
-    <div class="section-tag">Step 07 — Final</div>
-    <h1 class="section-title">Inject Into Portal</h1>
-    <p class="section-desc">Final copy-ready output. All variables injected. Paste directly into your coaching system.</p>
-  </div>
-
-  <div class="instruction">
-    <strong>OUTPUT:</strong> This is the final portal block with all master variables included. Copy and paste directly into Claude or your coaching portal. No further editing needed.
-  </div>
-
-  <div class="btn-row" style="margin-top:0">
-    <button class="btn btn-primary" onclick="injectPortal()">
-      ◆ Inject Into Portal
-    </button>
-  </div>
-
-  <div class="portal-box" id="portalBox" style="display:none">
-    <div class="portal-header">
-      <span class="portal-label">Portal Output — Injection Complete</span>
-      <button class="btn btn-copy" onclick="copyText('portalContent', this)">Copy Portal</button>
-    </div>
-    <div class="portal-content" id="portalContent"></div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="goToStep(6)">← Back to Variables</button>
-    <button class="btn btn-danger" onclick="resetSystem()" style="margin-left:auto">⟲ Reset System</button>
+    <button class="btn btn-secondary" onclick="navTo(1)">← Edit Profile</button>
+    <button class="btn btn-danger" onclick="resetAll()" style="margin-left:auto">⟲ Reset</button>
   </div>
 </div>
 
 </div><!-- /main-wrap -->
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 const state = {
   currentStep: 1,
-  completedSteps: new Set(),
-  mealCount: 1,
-  profile: {},
-  nutrition: {},
-  training: {},
-  masterVars: null
+  profile: null
 };
 
-// ════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  // Sync meal count from profile selector if set
-  const prefMeals = document.getElementById('p_meals_per_day');
-  prefMeals.addEventListener('change', () => {
-    const val = parseInt(prefMeals.value);
-    if (val >= 1 && val <= 5) setMealCount(val);
-  });
-  renderMeals(state.mealCount);
-  renderWeeklyDays();
-});
-
-// ════════════════════════════════════════════════════
-// MEAL COUNT
-// ════════════════════════════════════════════════════
-function setMealCount(n) {
-  state.mealCount = n;
-  document.querySelectorAll('.meal-count-btn').forEach(btn => {
-    btn.classList.toggle('active', parseInt(btn.dataset.count) === n);
-  });
-  renderMeals(n);
-}
-
-function renderMeals(count) {
-  const container = document.getElementById('mealsContainer');
-  container.innerHTML = '';
-  for (let i = 1; i <= count; i++) {
-    const isOpt = count > 3 && i > 3;
-    container.innerHTML += `
-    <div class="meal-card">
-      <div class="meal-card-header">
-        <span class="meal-num">Meal ${i}</span>
-        ${isOpt ? '<span class="meal-opt-badge">optional</span>' : ''}
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Meal Name</label>
-          <input type="text" id="meal${i}_name" placeholder="e.g. Breakfast / Post-Workout / Dinner">
-        </div>
-        <div class="field">
-          <label>Timing <span class="opt">(optional)</span></label>
-          <input type="text" id="meal${i}_timing" placeholder="e.g. 7:00 AM / 30 min after training">
-        </div>
-        <div class="field span2">
-          <label>Ingredients & Description <span class="opt">(optional)</span></label>
-          <textarea id="meal${i}_desc" rows="2" placeholder="e.g. 4 eggs scrambled + 2 slices whole wheat toast + 1 cup yogurt"></textarea>
-        </div>
-        <div class="field">
-          <label>Calories (kcal) <span class="opt">(optional)</span></label>
-          <input type="number" id="meal${i}_cals" placeholder="e.g. 450">
-        </div>
-        <div class="field">
-          <label>Protein (g) <span class="opt">(optional)</span></label>
-          <input type="number" id="meal${i}_protein" placeholder="e.g. 38">
-        </div>
-      </div>
-    </div>`;
-  }
-}
-
-// ════════════════════════════════════════════════════
-// WEEKLY DAYS — per-day card with exercise table
-// ════════════════════════════════════════════════════
-const DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-
-function renderWeeklyDays() {
-  const container = document.getElementById('weeklyDays');
-  container.innerHTML = '';
-  for (let i = 0; i < 7; i++) {
-    const n = i + 1;
-    container.innerHTML += `
-    <div class="day-card" id="dayCard${n}">
-      <div class="day-card-header">
-        <div class="day-card-title">
-          <span class="day-card-num">Day ${n}</span>
-          <span class="day-card-name">${DAY_NAMES[i]} <span style="color:var(--text-dim);font-size:10px">— As Day ${n}</span></span>
-        </div>
-        <div class="field" style="min-width:180px">
-          <label>Type</label>
-          <select id="day${n}_type" onchange="toggleDayCard(${n})">
-            <option value="">— Select —</option>
-            <option>Training Day</option>
-            <option>Rest Day</option>
-            <option>Active Recovery</option>
-            <option>Cardio Only</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="day-card-body" id="dayBody${n}" style="display:none">
-        <div class="form-grid" style="margin-bottom:16px">
-          <div class="field span2">
-            <label>Training Day Workout / Focus</label>
-            <input type="text" id="day${n}_workout" placeholder="e.g. Chest &amp; Triceps / Upper Push / Legs">
-          </div>
-        </div>
-
-        <div class="exer-table-wrap">
-          <table class="exer-table" id="exerTable${n}">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Exercise <span style="color:var(--text-dim);font-size:9px;font-weight:400;font-family:var(--mono)">list · name</span></th>
-                <th>Warm-up Sets</th>
-                <th>Sets</th>
-                <th>Reps</th>
-                <th>Load</th>
-                <th>Rest</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${[1,2,3,4,5,6,7].map(r => `
-              <tr>
-                <td class="exer-num">${r}</td>
-                <td>${buildExerciseCell(n, r)}</td>
-                <td><input type="text" id="day${n}_ex${r}_warmup" placeholder="e.g. 2x8"></td>
-                <td><input type="text" id="day${n}_ex${r}_sets" placeholder="e.g. 4"></td>
-                <td><input type="text" id="day${n}_ex${r}_reps" placeholder="e.g. 8–12"></td>
-                <td><input type="text" id="day${n}_ex${r}_load" placeholder="e.g. 70%"></td>
-                <td><input type="text" id="day${n}_ex${r}_rest" placeholder="e.g. 90s"></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="day-cardio-row">
-          <label>Cardio <span class="opt">(optional)</span></label>
-          <input type="text" id="day${n}_cardio" placeholder="e.g. 20 min LISS / 10 min HIIT / None">
-        </div>
-      </div>
-
-      <div class="day-rest-note" id="dayRest${n}" style="display:none">
-        <span style="color:var(--text-dim);font-family:var(--mono);font-size:11px">Rest / Recovery Day — No exercise table needed</span>
-        <div style="margin-top:10px" class="field">
-          <label>Cardio <span class="opt">(optional)</span></label>
-          <input type="text" id="day${n}_cardio_rest" placeholder="e.g. 30 min walk / None">
-        </div>
-      </div>
-    </div>`;
-  }
-}
-
-function toggleDayCard(n) {
-  const type = document.getElementById(`day${n}_type`).value;
-  const body = document.getElementById(`dayBody${n}`);
-  const rest = document.getElementById(`dayRest${n}`);
-  if (type === 'Training Day') {
-    body.style.display = 'block';
-    rest.style.display = 'none';
-  } else if (type === 'Rest Day' || type === 'Active Recovery' || type === 'Cardio Only') {
-    body.style.display = 'none';
-    rest.style.display = 'block';
-  } else {
-    body.style.display = 'none';
-    rest.style.display = 'none';
-  }
-}
-
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // NAVIGATION
-// ════════════════════════════════════════════════════
-function goToStep(n) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`step${n}`).classList.add('active');
+// ══════════════════════════════════════════════
+function navTo(n) {
+  if (n === 2 && !state.profile) {
+    showToast('Generate prompts first', 'var(--accent3)');
+    return;
+  }
   state.currentStep = n;
-  document.getElementById('statusText').textContent = `Step ${n} of 7`;
-
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
   document.querySelectorAll('.step-item').forEach(item => {
     const s = parseInt(item.dataset.step);
     item.classList.remove('active', 'done');
-    const num = item.querySelector('.step-num');
-    if (s === n) {
-      item.classList.add('active');
-      num.textContent = s;
-    } else if (state.completedSteps.has(s)) {
+    if (s === n) item.classList.add('active');
+    else if (s < n || (state.profile && s === 2)) {
       item.classList.add('done');
-      num.textContent = '✓';
+      item.querySelector('.step-num').textContent = '✓';
     } else {
-      num.textContent = s;
+      item.querySelector('.step-num').textContent = s;
     }
   });
-
-  // Populate profile summaries
-  if ((n === 2 || n === 4) && state.profile.name) {
-    renderProfileSummary(`profileSummary${n}`);
-  }
-
+  document.getElementById('statusText').textContent = `Step ${n} of 2`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function tryGoToStep(n) {
-  // Allow back-navigation freely; forward requires completion
-  if (n <= state.currentStep || state.completedSteps.has(n - 1) || n === 1) {
-    goToStep(n);
-  } else {
-    showToast(`Complete Step ${n - 1} first`, 'var(--accent3)');
-  }
+// ══════════════════════════════════════════════
+// SMART MODE
+// ══════════════════════════════════════════════
+function isSmartMode() {
+  return document.getElementById('smartToggle').checked;
+}
+function onSmartToggle() {
+  const on = isSmartMode();
+  const pill = document.getElementById('smartPill');
+  pill.textContent = on ? 'ON' : 'OFF';
+  pill.classList.toggle('on', on);
 }
 
-function renderProfileSummary(elId) {
-  const p = state.profile;
-  const el = document.getElementById(elId);
-  if (!el || !p.name) return;
-  el.innerHTML = `
-    <div class="ps-item"><span class="ps-label">Client</span><span class="ps-val">${p.name}</span></div>
-    <div class="ps-item"><span class="ps-label">Goal</span><span class="ps-val">${p.goalType || '—'}</span></div>
-    <div class="ps-item"><span class="ps-label">Weight</span><span class="ps-val">${p.currentWeight}kg → ${p.targetWeight}kg</span></div>
-    <div class="ps-item"><span class="ps-label">Training</span><span class="ps-val">${p.trainingDays} days/wk</span></div>
-    <div class="ps-item"><span class="ps-label">Environment</span><span class="ps-val">${p.environment || '—'}</span></div>
-    <div class="ps-item"><span class="ps-label">Activity</span><span class="ps-val">${p.activity || '—'}</span></div>
-  `;
-  el.classList.add('visible');
+// ══════════════════════════════════════════════
+// READ FORM
+// ══════════════════════════════════════════════
+function fv(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
 }
 
-// ════════════════════════════════════════════════════
-// STEP 1 — COMPLETE PROFILE
-// ════════════════════════════════════════════════════
-function completeStep1() {
-  const required = ['p_name','p_age','p_gender','p_height','p_current_weight','p_target_weight','p_goal_type','p_activity','p_training_days','p_environment','p_motivation'];
+// ══════════════════════════════════════════════
+// GENERATE — MAIN ENTRY
+// ══════════════════════════════════════════════
+function generatePrompts() {
+  const required = ['p_name','p_age','p_gender','p_height','p_current_weight',
+                    'p_target_weight','p_goal_type','p_activity',
+                    'p_training_days','p_environment','p_motivation'];
   for (const id of required) {
     const el = document.getElementById(id);
     if (!el || !el.value.trim()) {
@@ -1551,160 +811,458 @@ function completeStep1() {
   }
 
   state.profile = {
-    name:           v('p_name'),
-    age:            v('p_age'),
-    gender:         v('p_gender'),
-    height:         v('p_height'),
-    currentWeight:  v('p_current_weight'),
-    targetWeight:   v('p_target_weight'),
-    goalType:       v('p_goal_type'),
-    activity:       v('p_activity'),
-    trainingDays:   v('p_training_days'),
-    environment:    v('p_environment'),
-    equipment:      v('p_equipment')          || 'Standard gym equipment',
-    dietPref:       v('p_diet_pref')          || 'None',
-    unpreferredFoods: v('p_unpreferred_foods')|| 'None',
-    budget:         v('p_budget')             || 'Not specified',
-    mealsPerDay:    v('p_meals_per_day')       || String(state.mealCount),
-    medical:        v('p_medical')            || 'None',
-    motivation:     v('p_motivation')
+    name:            fv('p_name'),
+    age:             fv('p_age'),
+    gender:          fv('p_gender'),
+    height:          fv('p_height'),
+    currentWeight:   fv('p_current_weight'),
+    targetWeight:    fv('p_target_weight'),
+    goalType:        fv('p_goal_type'),
+    activity:        fv('p_activity'),
+    trainingDays:    fv('p_training_days'),
+    environment:     fv('p_environment'),
+    equipment:       fv('p_equipment')          || 'Standard gym equipment',
+    dietPref:        fv('p_diet_pref')          || 'None',
+    unpreferredFoods:fv('p_unpreferred_foods')  || 'None',
+    budget:          fv('p_budget')             || 'Not specified',
+    mealsPerDay:     fv('p_meals_per_day')       || '3',
+    medical:         fv('p_medical')            || 'None',
+    motivation:      fv('p_motivation')
   };
 
-  // Auto-sync meal count if profile sets it
-  const mpc = parseInt(state.profile.mealsPerDay);
-  if (mpc >= 1 && mpc <= 5) setMealCount(mpc);
+  const p = state.profile;
+  const smart = isSmartMode();
 
-  state.completedSteps.add(1);
-  goToStep(2);
+  // Build prompts
+  const nutPrompt   = smart ? buildSmartNutrition(p)  : buildStandardNutrition(p);
+  const trainPrompt = smart ? buildSmartTraining(p)   : buildStandardTraining(p);
+
+  // Render profile card
+  const wd = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
+  const wdStr = wd < 0 ? `−${Math.abs(wd).toFixed(1)} kg` : `+${wd.toFixed(1)} kg`;
+  document.getElementById('profileCard').innerHTML = `
+    <div class="pc-item"><span class="pc-label">Client</span><span class="pc-val">${p.name}</span></div>
+    <div class="pc-item"><span class="pc-label">Goal</span><span class="pc-val">${p.goalType}</span></div>
+    <div class="pc-item"><span class="pc-label">Target Change</span><span class="pc-val">${wdStr}</span></div>
+    <div class="pc-item"><span class="pc-label">Training</span><span class="pc-val">${p.trainingDays} days/wk</span></div>
+    <div class="pc-item"><span class="pc-label">Environment</span><span class="pc-val">${p.environment.split(' ')[0]}</span></div>
+    <div class="pc-item"><span class="pc-label">Mode</span><span class="pc-val" style="color:var(--accent)">${smart ? '⚡ Smart' : 'Standard'}</span></div>
+  `;
+
+  document.getElementById('nutPromptText').textContent   = nutPrompt;
+  document.getElementById('trainPromptText').textContent = trainPrompt;
+
+  // Show/hide smart badges
+  const showBadge = smart ? '' : 'none';
+  document.getElementById('nutBadge').style.display   = smart ? '' : 'none';
+  document.getElementById('trainBadge').style.display = smart ? '' : 'none';
+
+  navTo(2);
 }
 
-// ════════════════════════════════════════════════════
-// STEP 2 — GENERATE NUTRITION PROMPT
-// ════════════════════════════════════════════════════
-function generateNutritionPrompt() {
-  const p = state.profile;
-  if (!p.name) { showToast('Complete Step 1 first', 'var(--accent3)'); return; }
+// ══════════════════════════════════════════════
+// SMART NUTRITION PROMPT
+// ══════════════════════════════════════════════
+function buildSmartNutrition(p) {
+  const goal     = p.goalType;
+  const budget   = p.budget !== 'Not specified' ? parseInt(p.budget) : null;
+  const isLowBudget  = budget && budget < 600;
+  const hasDisliked  = p.unpreferredFoods !== 'None';
+  const hasMedical   = p.medical !== 'None';
 
+  let roleBlock, strategyDirectives, caloriePrinciple, proteinPrinciple, carbPrinciple, deliverables;
+  let specialRules = '';
+
+  if (goal === 'Fat Loss') {
+    roleBlock = `SERVICE: Fat Loss Nutrition Coaching
+You are a senior certified fat-loss nutritionist with 15+ years of experience. Your strength is building meal plans that create consistent caloric deficits without hunger, metabolic adaptation, or muscle loss. You use high-protein, high-satiety, low-calorie-density strategies that clients can sustain for months.`;
+    strategyDirectives = `- Apply a moderate caloric deficit (350–500 kcal below TDEE — NOT aggressive)
+- Protein must be the non-negotiable anchor: minimum 1.8g/kg bodyweight
+- Prioritize volume eating: high-satiety, low-calorie-density foods (vegetables, lean proteins, legumes)
+- Add explicit hunger-control strategies and appetite management tools
+- Design meals that keep the client full between sessions
+- Include strategies to prevent weekend/social situation derailment
+- Emphasize consistency over perfection`;
+    caloriePrinciple  = 'Moderate deficit — 350 to 500 kcal below calculated TDEE';
+    proteinPrinciple  = 'HIGH — minimum 1.8–2.0g per kg bodyweight to preserve muscle during deficit';
+    carbPrinciple     = 'Moderate to low — timed around training, prioritized post-workout';
+    deliverables = `1. TDEE estimate and caloric deficit target
+2. Macro targets (calories, protein, carbs, fats) with rationale
+3. Full daily meal plan with exact portions (${p.mealsPerDay} meals)
+4. Per-meal calorie + protein breakdown
+5. Hunger-control strategies (timing, food choices, meal structure)
+6. Fat-loss food swaps using Egyptian alternatives
+7. 7-day repeatable structure with variety
+8. Budget-friendly weekly shopping list
+9. Strategies to manage cravings, hunger gaps, and social eating
+10. Common fat-loss nutrition mistakes to avoid
+11. Daily adherence checklist`;
+  }
+  else if (goal === 'Muscle Gain') {
+    roleBlock = `SERVICE: Muscle Gain Nutrition Coaching
+You are a senior certified sports nutritionist specializing in evidence-based muscle hypertrophy nutrition. Your approach is built on controlled caloric surplus, optimized protein distribution, and performance-focused meal timing that maximizes anabolic response without excessive fat gain.`;
+    strategyDirectives = `- Apply a controlled caloric surplus (250–400 kcal above TDEE — lean bulk approach)
+- Protein must support maximum muscle protein synthesis: 1.8–2.2g/kg bodyweight
+- Distribute protein across all meals — no single meal below 30g protein
+- Design pre-workout and post-workout meals as high-priority nutrition windows
+- Include performance-focused carbohydrate timing around training
+- Prioritize calorie-dense, easy-to-eat foods
+- Structure eating to support training energy and recovery`;
+    caloriePrinciple  = 'Controlled surplus — 250 to 400 kcal above calculated TDEE (lean bulk)';
+    proteinPrinciple  = 'HIGH — 1.8–2.2g per kg bodyweight, evenly distributed across all meals';
+    carbPrinciple     = 'HIGH — timed around training sessions for fuel and recovery';
+    deliverables = `1. TDEE estimate and lean bulk caloric surplus target
+2. Macro targets with training-day vs rest-day adjustments
+3. Full daily meal plan (${p.mealsPerDay} meals) with emphasis on pre/post-workout windows
+4. Per-meal calorie + protein breakdown
+5. Pre-workout meal (timing, composition, size)
+6. Post-workout meal/shake recommendations
+7. High-protein, calorie-dense Egyptian food options
+8. 7-day repeatable meal structure
+9. Budget-friendly shopping list
+10. Common muscle-gain nutrition mistakes to avoid
+11. Progress tracking checklist`;
+  }
+  else if (goal === 'Diabetes') {
+    roleBlock = `SERVICE: Diabetes Medical Nutrition Therapy (Type 1)
+You are a diabetes nutrition specialist with extensive clinical experience creating safe, structured meal plans for people with Type 1 diabetes. ABSOLUTE RULE: Do NOT calculate, change, recommend, or comment on insulin doses in any way. Nutrition management only.`;
+    strategyDirectives = `- CRITICAL SAFETY: Never recommend or comment on insulin doses — nutrition management only
+- Distribute carbohydrates evenly and consistently across all meals
+- Prioritize foods with low glycemic index and high fiber content
+- Add safety notes on hypoglycemia-risk foods and situations
+- Structure meal timing for glycemic predictability
+- Include guidance on managing blood sugar around exercise
+- Consistent portion control to help with carbohydrate counting`;
+    caloriePrinciple  = 'Appropriate to goal — balanced to support stable blood glucose levels';
+    proteinPrinciple  = 'Moderate to high — supports satiety and glycemic stability between meals';
+    carbPrinciple     = 'CONTROLLED — evenly distributed, consistent per meal, low GI sources prioritized';
+    deliverables = `1. Carbohydrate distribution target per meal (consistent and predictable)
+2. Recommended foods for glycemic stability (low GI, high fiber)
+3. Full daily meal plan with exact carbohydrate counts per meal
+4. Pre/post-exercise meal guidance for Type 1 diabetes safety
+5. Hypoglycemia-risk awareness and what to keep on hand
+6. Foods to limit or avoid for better glycemic control
+7. 7-day repeatable structure with consistent carb distribution
+8. Egyptian food options that support blood glucose management
+9. Shopping list
+10. Safety disclaimer: nutritional guidance only — insulin adjustments require a licensed endocrinologist
+11. Tracking checklist`;
+    specialRules += '\n- SAFETY REMINDER embedded in output: All insulin decisions must be handled by the client\'s endocrinologist. This plan covers nutrition only.';
+  }
+  else { // Recomp
+    roleBlock = `SERVICE: Body Recomposition Nutrition Coaching
+You are a senior certified sports nutritionist specializing in simultaneous fat loss and muscle retention. Your approach uses precise protein targets and strategic calorie cycling to shift body composition without dramatic weight change.`;
+    strategyDirectives = `- Target maintenance calories or a very small deficit (0–250 kcal below TDEE)
+- Protein is the central lever: 1.8–2.2g/kg bodyweight to drive recomposition
+- Use training-day vs rest-day nutrition differences where appropriate
+- Prioritize nutrient timing to maximize the anabolic window
+- Set realistic expectations: recomposition is slow but sustainable
+- Focus on body composition change, not scale weight`;
+    caloriePrinciple  = 'Near-maintenance or very slight deficit (0–250 kcal below TDEE)';
+    proteinPrinciple  = 'VERY HIGH — 1.8–2.2g per kg, the primary driver of recomposition';
+    carbPrinciple     = 'Moderate — higher on training days, lower on rest days';
+    deliverables = `1. TDEE and recomposition caloric target with rationale
+2. Macro targets — training-day and rest-day breakdowns
+3. Full daily meal plan (${p.mealsPerDay} meals) optimized for recomposition
+4. Per-meal calorie + protein breakdown
+5. Training-day vs rest-day meal adjustments
+6. High-protein Egyptian food options
+7. 7-day repeatable structure
+8. Shopping list
+9. Recomposition progress indicators (measurements, mirror, performance)
+10. Common recomp mistakes to avoid
+11. Adherence checklist`;
+  }
+
+  if (isLowBudget) {
+    specialRules += `\n- BUDGET CONSTRAINT (${budget} EGP/week): Use budget-friendly Egyptian staples only — eggs, lentils, foul medames, frozen chicken, canned tuna, sweet potato, oats, rice, baladi bread, seasonal vegetables. Optimize cost per gram of protein.`;
+  }
+  if (hasDisliked) {
+    specialRules += `\n- DISLIKED FOODS (${p.unpreferredFoods}): Exclude all listed items completely. Do not mention them. Replace silently with nutritionally equivalent alternatives.`;
+  }
+  if (hasMedical) {
+    specialRules += `\n- MEDICAL CONSIDERATIONS (${p.medical}): Adjust plan accordingly. Flag foods or approaches that interact with listed conditions. Safety first.`;
+  }
+
+  let activityNote = '';
+  if (p.activity.includes('Sedentary')) {
+    activityNote = '\nActivity note: Client is sedentary — use minimal activity multiplier. Emphasize habit formation.';
+  } else if (p.activity.includes('Very Active') || p.activity.includes('Extremely Active')) {
+    activityNote = '\nActivity note: Client is highly active — ensure adequate intake to support recovery. Do not under-eat.';
+  }
+
+  return `${roleBlock}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━
+- Name: ${p.name}
+- Age: ${p.age} | Gender: ${p.gender}
+- Height: ${p.height} cm | Current weight: ${p.currentWeight} kg | Target weight: ${p.targetWeight} kg
+- Activity level: ${p.activity}
+- Training days/week: ${p.trainingDays}
+- Meals per day: ${p.mealsPerDay}
+- Dietary preferences/restrictions: ${p.dietPref}
+- Weekly food budget (EGP): ${p.budget}
+- Medical conditions / limitations: ${p.medical}
+- Country / food availability: Egypt
+- Client motivation: ${p.motivation}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+NUTRITION STRATEGY PARAMETERS
+━━━━━━━━━━━━━━━━━━━━━━━
+Caloric principle: ${caloriePrinciple}
+Protein principle: ${proteinPrinciple}
+Carbohydrate principle: ${carbPrinciple}${activityNote}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+MANDATORY DIRECTIVES
+━━━━━━━━━━━━━━━━━━━━━━━
+${strategyDirectives}
+- Use exact portion sizes in grams, cups, tablespoons, or pieces
+- Include calorie AND protein estimates for every meal
+- Every recommended food must be available in Egyptian markets
+- Make the plan easy to prep, repeat, and sustain long-term${specialRules}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+REQUIRED DELIVERABLES
+━━━━━━━━━━━━━━━━━━━━━━━
+${deliverables}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━
+Strategy Summary → Nutrition Targets → Meal Plan → Food Swaps → Shopping List → Key Strategies → Mistakes to Avoid → Adherence Checklist
+
+Be specific, practical, and direct. No generic filler. Every sentence must be actionable. Use real Egyptian household foods only.`;
+}
+
+// ══════════════════════════════════════════════
+// SMART TRAINING PROMPT
+// ══════════════════════════════════════════════
+function buildSmartTraining(p) {
+  const goal  = p.goalType;
+  const days  = parseInt(p.trainingDays) || 3;
+  const env   = p.environment || '';
+  const hasMedical = p.medical !== 'None';
+
+  // Split selection
+  let splitDirective;
+  if (days <= 3) {
+    splitDirective = `MANDATORY SPLIT: Full Body — ${days} days/week. Each session trains all major muscle groups with slightly different emphasis per day (e.g., Day A: squat-dominant, Day B: hinge-dominant, Day C: push-dominant).`;
+  } else if (days === 4) {
+    splitDirective = `MANDATORY SPLIT: Upper/Lower 4-day split. Upper A + Lower A + Upper B + Lower B. Twice-per-week muscle group frequency with adequate recovery.`;
+  } else {
+    splitDirective = `MANDATORY SPLIT: Push/Pull/Legs${days === 6 ? ' × 2 (6-day)' : ' + accessory day'}. High-frequency hypertrophy split for very active clients.`;
+  }
+
+  // Environment
+  let equipmentDirective;
+  if (env.includes('Gym')) {
+    equipmentDirective = `ENVIRONMENT: Full gym access. Use barbells, dumbbells, cables, machines, racks. Do not restrict to bodyweight or bands.`;
+  } else if (env.includes('Home') && !env.toLowerCase().includes('no equipment') && !env.toLowerCase().includes('bodyweight')) {
+    equipmentDirective = `ENVIRONMENT: Home gym — limited equipment (${p.equipment}). Use dumbbells, resistance bands, and compound bodyweight movements. Provide load progression using available tools.`;
+  } else if (env.toLowerCase().includes('bodyweight') || env.toLowerCase().includes('no equipment')) {
+    equipmentDirective = `ENVIRONMENT: Bodyweight only. Use calisthenics progression — leverage changes, tempo manipulation, unilateral work, isometric holds. Include skill progressions (e.g., push-up → archer push-up → pseudo planche).`;
+  } else if (env.includes('Hybrid')) {
+    equipmentDirective = `ENVIRONMENT: Hybrid. Gym sessions for heavy compound work, home sessions for accessory and conditioning. Ensure program coherence across both environments.`;
+  } else {
+    equipmentDirective = `ENVIRONMENT: Outdoor. Use park equipment, calisthenics, running/sprinting, and resistance bands. Sessions must be executable without fixed machines.`;
+  }
+
+  // Goal directives
+  let goalDirectives, periodizationBlock;
+  if (goal === 'Fat Loss') {
+    goalDirectives = `GOAL DIRECTIVES — FAT LOSS:
+- Preserve lean mass while maximizing metabolic demand
+- Add metabolic conditioning circuits on at least 2 sessions/week
+- Cardio protocol: ${days <= 3 ? 'LISS cardio 20–30 min post-session' : 'HIIT 2x/week on non-consecutive days + LISS 1–2x/week'}
+- Rep ranges: 8–15 for hypertrophy-metabolic overlap
+- Rest periods: shorter (45–75 sec) to increase caloric expenditure
+- Do not drop weights excessively — keep intensity high enough to preserve muscle
+- Higher training frequency preferred`;
+    periodizationBlock = `PERIODIZATION: Linear metabolic progression
+- Weeks 1–3: Accumulation — moderate volume, circuit-style
+- Weeks 4–6: Intensification — add load, reduce rest
+- Weeks 4 & 8: Deload — 40% volume reduction
+- Weeks 7–9: Peak metabolic phase
+- Weeks 10–12: Strength retention + conditioning hybrid`;
+  } else if (goal === 'Muscle Gain') {
+    goalDirectives = `GOAL DIRECTIVES — MUSCLE GAIN (HYPERTROPHY):
+- Maximize muscle protein synthesis via progressive mechanical tension and volume
+- Rep ranges: 6–12 for primary compounds, 10–20 for accessories
+- Rest periods: 2–3 min for compounds, 60–90 sec for accessories
+- Volume targets: beginner 10–12 sets/muscle/week, intermediate 14–18, advanced 16–22
+- Progressive overload: add 2.5–5 kg or 1–2 reps per week per lift
+- Cardio: minimal — 1–2 short LISS sessions only
+- Prioritize compound anchors: squat, deadlift, bench, row, overhead press`;
+    periodizationBlock = `PERIODIZATION: Linear hypertrophy progression
+- Weeks 1–3: Volume accumulation — moderate load, higher sets
+- Weeks 4–6: Intensification — increase load 5–10%, reduce volume 10%
+- Weeks 4 & 8: Deload — 50% volume, same exercises
+- Weeks 7–9: High intensity strength phase
+- Weeks 10–12: Peak hypertrophy — maximized volume before program end`;
+  } else if (goal === 'Diabetes') {
+    goalDirectives = `GOAL DIRECTIVES — DIABETES (TYPE 1):
+- Safe, effective training that supports glycemic stability
+- Moderate-intensity resistance training preferred over extreme HIIT
+- Include post-exercise guidance relevant to blood sugar management
+- Avoid fasted training without specific medical clearance
+- Low-to-moderate intensity steady-state cardio preferred over maximal output
+- Clear session timing recommendations relative to meals`;
+    periodizationBlock = `PERIODIZATION: Conservative progressive overload
+- Low-to-moderate intensity throughout all 12 weeks
+- Gradual volume increases only — no sudden spikes
+- Deload weeks 4, 8, 12
+- Emphasize recovery and consistency over intensity peaks`;
+  } else {
+    goalDirectives = `GOAL DIRECTIVES — BODY RECOMPOSITION:
+- Balance strength/hypertrophy training with metabolic conditioning
+- Rep ranges: 6–15 (varied) to stimulate strength and hypertrophy simultaneously
+- Include metabolic finishers (5–10 min) at session end on 2 days/week
+- Cardio: 2x/week moderate intensity — enough to support fat reduction, not enough to impair recovery
+- Progressive overload is essential — do not stagnate on loads`;
+    periodizationBlock = `PERIODIZATION: Undulating recomposition model
+- Weeks 1–4: Foundation — movement quality and base volume
+- Weeks 5–8: Intensification — increase loads, introduce metabolic elements
+- Weeks 9–12: Peak phase — highest volume/intensity balance
+- Deload: weeks 4, 8 (reduce volume 40%, maintain movement patterns)`;
+  }
+
+  let medicalBlock = '';
+  if (hasMedical) {
+    medicalBlock = `
+
+━━━━━━━━━━━━━━━━━━━━━━━
+MEDICAL & INJURY SAFETY PROTOCOL
+━━━━━━━━━━━━━━━━━━━━━━━
+Reported conditions/limitations: ${p.medical}
+
+MANDATORY RULES:
+- Identify every movement pattern that could aggravate listed condition(s)
+- For EACH prohibited pattern, provide a safe effective substitute
+- Do not load the injured/limited structure into pain
+- Adjust ROM, load, and tempo as needed
+- Flag any exercise requiring extra caution
+- Include specific recovery and mobility recommendations`;
+  }
+
+  let activityNote = '';
+  if (p.activity.includes('Sedentary')) {
+    activityNote = `\nACTIVITY NOTE: Client is sedentary — begin at the lower end of volume range. Focus on movement quality and habit formation in weeks 1–4.`;
+  } else if (p.activity.includes('Very Active') || p.activity.includes('Extremely Active')) {
+    activityNote = `\nACTIVITY NOTE: Client is highly active — can tolerate higher starting volume. Account for total activity load when prescribing additional cardio.`;
+  }
+
+  return `SYSTEM: Smart Strength & Conditioning AI — Adaptive Periodization Architect — Injury-Safe Performance Coach
+[GOAL: ${goal} | ENVIRONMENT: ${env} | DAYS: ${days}/week]
+
+Your task: Build a complete 12-week training system fully customized to this client's goal, environment, equipment, activity level, and limitations.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━
+- Name: ${p.name}
+- Age: ${p.age} | Gender: ${p.gender}
+- Height: ${p.height} cm | Weight: ${p.currentWeight} kg
+- Primary Goal: ${goal}
+- Training Days/Week: ${days}
+- Training Environment: ${env}
+- Available Equipment: ${p.equipment}
+- Activity Level: ${p.activity}
+- Medical Conditions / Injuries / Limitations: ${p.medical}
+- Client Motivation: ${p.motivation}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PROGRAM ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━
+${splitDirective}
+
+${equipmentDirective}
+
+${goalDirectives}
+
+${periodizationBlock}${activityNote}${medicalBlock}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+REQUIRED OUTPUT (STRICT FORMAT)
+━━━━━━━━━━━━━━━━━━━━━━━
+A) CLIENT SNAPSHOT — Status, goal, limitations, selected strategy rationale
+B) TRAINING STRATEGY — Why this split, why this periodization, what 12 weeks will achieve
+C) SPLIT DESIGN — Session structure with day-by-day breakdown
+D) 12-WEEK MACRO OVERVIEW TABLE — Week | Phase | Goal | Volume | Intensity | Focus | Deload Note
+E) FULL PROGRAM — Every session, every week. Per exercise: Sets / Reps / RPE | Rest | Tempo | Substitution
+F) PROGRESSION MODEL — Weekly load targets, deload triggers, progress measurement${goal === 'Fat Loss' ? '\nG) CARDIO PROTOCOL — Type, duration, intensity, placement relative to resistance sessions' : ''}
+Final: COACHING NOTES — What the client must know to execute this program correctly
+
+━━━━━━━━━━━━━━━━━━━━━━━
+STYLE RULES
+━━━━━━━━━━━━━━━━━━━━━━━
+- No motivational filler — every line must be actionable
+- Do not assume equipment not listed above
+- Do not ignore injuries or limitations
+- Output must be coach-grade — not generic fitness blog content
+- Use sport science terminology where appropriate`;
+}
+
+// ══════════════════════════════════════════════
+// STANDARD PROMPTS (Smart Mode OFF)
+// ══════════════════════════════════════════════
+function buildStandardNutrition(p) {
   const serviceMap = {
-    'Fat Loss':    'SERVICE: Weight Loss — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist and fat-loss coach with 15+ years of experience designing personalized, budget-friendly, high-protein meal plans for sustainable weight loss without extreme restriction.',
-    'Muscle Gain': 'SERVICE: Muscle Gain — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist and healthy weight-gain coach with 15+ years of experience creating practical, budget-friendly, high-protein meal plans for controlled, healthy, sustainable weight gain.',
-    'Diabetes':    'SERVICE: Diabetes — Medical Nutrition Therapy Support (Type 1)\nYou are a diabetes nutrition specialist with extensive experience creating safe, practical, budget-conscious meal plans for people with Type 1 diabetes. CRITICAL: Do not calculate, change, or recommend insulin doses. Only organize meals and carbohydrate distribution.',
-    'Recomp':      'SERVICE: Body Recomposition — Nutrition Coaching / Meal Plan\nYou are a senior certified nutritionist with 15+ years of experience designing recomposition-focused, high-protein meal plans that simultaneously reduce fat and build lean muscle.'
+    'Fat Loss':    'SERVICE: Weight Loss — Nutrition Coaching\nYou are a senior certified nutritionist and fat-loss coach with 15+ years of experience designing personalized, high-protein meal plans for sustainable weight loss.',
+    'Muscle Gain': 'SERVICE: Muscle Gain — Nutrition Coaching\nYou are a senior certified nutritionist with 15+ years of experience creating practical, high-protein meal plans for controlled, sustainable weight gain.',
+    'Diabetes':    'SERVICE: Diabetes — Medical Nutrition Therapy (Type 1)\nYou are a diabetes nutrition specialist. CRITICAL: Do not calculate, change, or recommend insulin doses. Nutrition management only.',
+    'Recomp':      'SERVICE: Body Recomposition — Nutrition Coaching\nYou are a senior certified nutritionist with 15+ years of experience designing recomposition-focused, high-protein meal plans.'
   };
   const serviceBlock = serviceMap[p.goalType] || serviceMap['Recomp'];
+  const wd = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
+  const wdStr = wd < 0 ? 'loss' : wd > 0 ? 'gain' : 'maintenance';
 
-  const weightDiff = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
-  const weightDirection = weightDiff < 0 ? 'loss' : weightDiff > 0 ? 'gain' : 'maintenance';
-
-  const prompt = `${serviceBlock}
+  return `${serviceBlock}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 CLIENT DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━
 - Name: ${p.name}
 - Age: ${p.age} | Gender: ${p.gender}
-- Height: ${p.height} cm | Current weight: ${p.currentWeight} kg | Target: ${p.targetWeight} kg
-- Weight direction: ${weightDirection} (${Math.abs(weightDiff).toFixed(1)} kg total)
+- Height: ${p.height} cm | Current: ${p.currentWeight} kg | Target: ${p.targetWeight} kg (${Math.abs(wd).toFixed(1)} kg ${wdStr})
 - Activity level: ${p.activity}
 - Training days/week: ${p.trainingDays}
-- Dietary preferences/restrictions: ${p.dietPref}
+- Dietary preferences: ${p.dietPref}
 - Disliked foods: ${p.unpreferredFoods}
 - Weekly food budget (EGP): ${p.budget}
 - Meals per day: ${p.mealsPerDay}
-- Medical conditions / limitations: ${p.medical}
-- Country / food availability: Egypt
+- Medical conditions: ${p.medical}
+- Country: Egypt
 - Client motivation: ${p.motivation}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-NON-NEGOTIABLE REQUIREMENTS
+REQUIREMENTS
 ━━━━━━━━━━━━━━━━━━━━━━━
-- Prioritize high-protein meals (fullness + muscle retention/gain)
-- Use affordable, common Egyptian foods
-- Give exact portions in grams, cups, spoons, or pieces
-- Include estimated calories AND protein for each meal
-- Make the plan easy to repeat and easy to prep
-- Include smart swaps for disliked or unavailable foods
-- Include hunger-control and adherence strategies
-- Focus on long-term consistency, not short-term perfection
+- High-protein meals — exact portions in grams/cups/pieces
+- Estimated calories AND protein per meal
+- Affordable, common Egyptian foods only
+- Easy to repeat and prep
+- Hunger-control and adherence strategies
+- Smart swaps for disliked or unavailable foods
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-WHAT YOU MUST DELIVER
+DELIVER
 ━━━━━━━━━━━━━━━━━━━━━━━
-1. Brief assessment of strategy (fat-loss / gain / recomp direction)
-2. Daily calorie target, protein target, macro breakdown
-3. Full daily meal plan with timing and exact portions (${p.mealsPerDay} meals)
-4. Calories and protein for every meal and snack
-5. Alternative food options for each meal
-6. 7-day repeatable structure
-7. One-week shopping list (budget-friendly Egyptian foods)
-8. Food swaps for budget, availability, and taste
-9. Tips to improve satiety, control cravings, stay consistent
-10. Common mistakes to avoid
-11. Simple adherence checklist
-
-━━━━━━━━━━━━━━━━━━━━━━━
-OUTPUT FORMAT
-━━━━━━━━━━━━━━━━━━━━━━━
-Strategy Summary → Nutrition Targets → Meal Plan → Food Swaps → Shopping List → Tips → Mistakes to Avoid → Adherence Checklist
-
-Be specific, practical, and direct. No vague or generic answers. Use realistic Egyptian household foods.`;
-
-  document.getElementById('nutritionPromptText').textContent = prompt;
-  document.getElementById('nutritionPromptBox').style.display = 'block';
-  document.getElementById('nutritionPromptBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+1. Strategy assessment and calorie/macro targets
+2. Full daily meal plan (${p.mealsPerDay} meals) with exact portions
+3. Calories and protein per meal
+4. 7-day repeatable structure
+5. Shopping list
+6. Food swaps
+7. Adherence tips and checklist`;
 }
 
-// ════════════════════════════════════════════════════
-// STEP 3 — COMPLETE NUTRITION FILE
-// ════════════════════════════════════════════════════
-function completeStep3() {
-  if (!v('n_diet_name') || !v('n_diet_type')) {
-    showToast('Fill Diet Name and Type', 'var(--accent3)');
-    return;
-  }
+function buildStandardTraining(p) {
+  return `SYSTEM: Strength & Conditioning AI — Periodization Architect — Injury-Safe Coach
 
-  const meals = [];
-  for (let i = 1; i <= state.mealCount; i++) {
-    const name = v(`meal${i}_name`);
-    const desc = v(`meal${i}_desc`);
-    meals.push({
-      name:    name    || `Meal ${i}`,
-      timing:  v(`meal${i}_timing`)  || 'Not specified',
-      desc:    desc    || 'Not specified',
-      cals:    v(`meal${i}_cals`)    || '—',
-      protein: v(`meal${i}_protein`) || '—'
-    });
-  }
-
-  state.nutrition = {
-    dietName:    v('n_diet_name'),
-    dietType:    v('n_diet_type'),
-    dietApproach: v('n_diet_approach') || 'Not specified',
-    dietDesc:    v('n_diet_desc')      || 'Not specified',
-    meals,
-    mealCount:   state.mealCount,
-    supps:       [v('n_supp1')||'None', v('n_supp2')||'None', v('n_supp3')||'None', v('n_supp4')||'None'],
-    preWorkout:  v('n_pre_workout')    || 'Not specified',
-    postWorkout: v('n_post_workout')   || 'Not specified',
-    hydration:   v('n_hydration')      || 'Not specified',
-    sleep:       v('n_sleep')          || 'Not specified',
-    adherence:   v('n_adherence')      || 'Not specified'
-  };
-
-  state.completedSteps.add(3);
-  goToStep(4);
-}
-
-// ════════════════════════════════════════════════════
-// STEP 4 — GENERATE TRAINING PROMPT
-// ════════════════════════════════════════════════════
-function generateTrainingPrompt() {
-  const p = state.profile;
-  if (!p.name) { showToast('Complete Step 1 first', 'var(--accent3)'); return; }
-
-  const prompt = `SYSTEM: Autonomous Strength & Conditioning AI — Elite Periodization Architect — Injury-Safe Performance Coach
-
-Your task: Build a complete 12-week training system, immediately executable, fully customized, science-based periodization, progressive in volume and intensity, safe for any listed injuries, appropriate for the available equipment and environment.
+Build a complete 12-week training program customized to this client's goal, equipment, and limitations.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 CLIENT PROFILE
@@ -1714,321 +1272,34 @@ CLIENT PROFILE
 - Height: ${p.height} cm | Weight: ${p.currentWeight} kg
 - Primary Goal: ${p.goalType}
 - Training Days/Week: ${p.trainingDays}
-- Training Environment: ${p.environment}
-- Available Equipment: ${p.equipment}
+- Environment: ${p.environment}
+- Equipment: ${p.equipment}
 - Activity Level: ${p.activity}
-- Medical Conditions / Injuries / Limitations: ${p.medical}
-- Client Motivation: ${p.motivation}
+- Medical / Injuries: ${p.medical}
+- Motivation: ${p.motivation}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-DECISION ENGINE (Apply internally — do not narrate)
+DELIVER
 ━━━━━━━━━━━━━━━━━━━━━━━
-- Select periodization model based on goal:
-  Hypertrophy → Accumulation → Intensification → Deload → Peak
-  Strength → Neural Adaptation → Heavy Accumulation → Peaking → Deload
-  Fat Loss → Strength Retention + Metabolic Conditioning Blocks
-- Volume: Beginner 8–12 sets/muscle/week | Intermediate 12–18 | Advanced 14–24
-- Intensity: Hypertrophy 60–80% 1RM (RPE 6–9) | Strength 75–95% 1RM (RPE 7–10)
-- Progression: Increase load OR reps OR sets weekly (not all simultaneously)
-- Every 4th week = deload or reduced volume
-- Injury rule: Never load painful range. Always provide substitution for push / pull / hinge / squat / carry / core
+A) Client snapshot and strategy rationale
+B) Split design with scientific rationale
+C) 12-week macro overview table
+D) Full program — every session. Per exercise: Sets / Reps / RPE | Rest | Substitution
+E) Progression model and deload structure
+F) Injury safety rules — prohibited movements + safe substitutes
+G) Coaching notes
 
-━━━━━━━━━━━━━━━━━━━━━━━
-REQUIRED OUTPUT (STRICT FORMAT)
-━━━━━━━━━━━━━━━━━━━━━━━
-A) CLIENT SNAPSHOT — Summary of client status, goal, limitations, strategy
-B) TRAINING STRATEGY (12 WEEKS) — Periodization logic, phase-by-phase expectations
-C) SPLIT DESIGN — Selected split with scientific rationale
-D) 12-WEEK MACRO OVERVIEW TABLE — Week | Phase | Goal | Volume Trend | Intensity Trend | Focus | Recovery Note | Injury Adjustment
-E) FULL PROGRAM (WEEKLY STRUCTURE) — For each session: Warm-up | Main Lifts | Accessories | Core | Conditioning (if needed). Per exercise: Sets / Reps / RPE | Rest time | Tempo | Substitution option
-F) PROGRESSION MODEL — Weekly load increases, volume reduction triggers, deload structure, progress measurement
-G) INJURY & SAFETY SYSTEM — Per injury: Prohibited movements | Substitutions | ROM adjustments | Warning signals
-H) COACHING NOTES (CLIENT-FACING) — Execution rules | Common mistakes | Progress indicators | Load reduction signals
-I) PERFORMANCE OUTCOME MODEL — Realistic 12-week expectations | Success indicators for goal type
-
-━━━━━━━━━━━━━━━━━━━━━━━
-STYLE RULES
-━━━━━━━━━━━━━━━━━━━━━━━
-- No motivational filler — every sentence must be actionable
-- Do not assume equipment not listed above
-- Do not ignore injuries
-- Do not repeat the same intensity week-over-week
-- Output must be coach-grade, not fitness blog content
-- Use sport science terminology where appropriate`;
-
-  document.getElementById('trainingPromptText').textContent = prompt;
-  document.getElementById('trainingPromptBox').style.display = 'block';
-  document.getElementById('trainingPromptBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+Style: coach-grade, actionable, no filler, no generic content.`;
 }
 
-// ════════════════════════════════════════════════════
-// STEP 5 — COMPLETE TRAINING FILE
-// ════════════════════════════════════════════════════
-function completeStep5() {
-  if (!v('t_split_name')) { showToast('Fill the split name', 'var(--accent3)'); return; }
-
-  const days = [];
-  for (let i = 1; i <= 7; i++) {
-    const type = v(`day${i}_type`) || 'Rest Day';
-    const isTraining = type === 'Training Day';
-    // cardio comes from different field depending on day type
-    const cardio = isTraining
-      ? (v(`day${i}_cardio`) || 'None')
-      : (v(`day${i}_cardio_rest`) || 'None');
-
-    const exercises = [];
-    if (isTraining) {
-      for (let r = 1; r <= 7; r++) {
-        const name = v(`day${i}_ex${r}_name`);
-        if (name) {
-          exercises.push({
-            num:    r,
-            name,
-            warmup: v(`day${i}_ex${r}_warmup`) || '—',
-            sets:   v(`day${i}_ex${r}_sets`)   || '—',
-            reps:   v(`day${i}_ex${r}_reps`)   || '—',
-            load:   v(`day${i}_ex${r}_load`)   || '—',
-            rest:   v(`day${i}_ex${r}_rest`)   || '—'
-          });
-        }
-      }
-    }
-
-    days.push({
-      num:     i,
-      name:    DAY_NAMES[i - 1],
-      type,
-      workout: v(`day${i}_workout`) || (isTraining ? 'Training' : type),
-      cardio,
-      exercises
-    });
-  }
-
-  state.training = {
-    splitName:    v('t_split_name'),
-    tableLink:    v('t_table_link') || 'Not provided',
-    days,
-    trainingDays: days.filter(d => d.type === 'Training Day').length || parseInt(state.profile.trainingDays) || 3,
-    restDays:     days.filter(d => d.type === 'Rest Day').length
-  };
-
-  state.completedSteps.add(5);
-  goToStep(6);
-}
-
-// ════════════════════════════════════════════════════
-// STEP 6 — GENERATE MASTER VARIABLES
-// ════════════════════════════════════════════════════
-function generateMasterVariables() {
-  const p = state.profile;
-  const n = state.nutrition;
-  const t = state.training;
-
-  if (!p.name) { showToast('Complete client profile first', 'var(--accent3)'); return; }
-
-  const miss  = val => (val && val !== '' && val !== 'None' && val !== 'Not specified' && val !== 'Not provided') ? val : 'Missing';
-  const safe  = val => (val && val !== '') ? val : 'Missing';
-
-  const weightDiff = parseFloat(p.targetWeight || 0) - parseFloat(p.currentWeight || 0);
-  const diffStr    = weightDiff < 0
-    ? `${Math.abs(weightDiff).toFixed(1)} kg loss`
-    : `${weightDiff.toFixed(1)} kg gain`;
-
-  const subtitleMap = {
-    'Fat Loss':    'Fat Loss Phase',
-    'Muscle Gain': 'Muscle Gain Phase',
-    'Diabetes':    'Medical Nutrition Phase',
-    'Recomp':      'Recomposition Phase'
-  };
-  const subtitle = subtitleMap[p.goalType] || 'Coaching Phase';
-
-  // Meals block — dynamic count
-  let mealsBlock = '';
-  const mealCount = n.meals ? n.meals.length : 0;
-  const MAX_MEALS = 5;
-  for (let i = 0; i < MAX_MEALS; i++) {
-    const m = n.meals && n.meals[i];
-    if (m) {
-      mealsBlock += `{{MEAL_${i+1}}} = ${m.name} (${m.timing}) — ${m.desc} | ~${m.cals} kcal / ${m.protein}g protein\n`;
-    } else {
-      mealsBlock += `{{MEAL_${i+1}}} = Not used\n`;
-    }
-  }
-
-  // Weekly days block — full split per day with exercises
-  let daysBlock = '';
-  if (t.days && t.days.length) {
-    t.days.forEach((d, i) => {
-      daysBlock += `\n  Day ${d.num} — ${d.name} (As Day ${d.num})\n`;
-      daysBlock += `  Type    : ${d.type}\n`;
-      daysBlock += `  Focus   : ${d.workout}\n`;
-      if (d.exercises && d.exercises.length) {
-        daysBlock += `  Exercises:\n`;
-        daysBlock += `  #  | Exercise                | Warm-up | Sets | Reps  | Load  | Rest\n`;
-        daysBlock += `  ---+-------------------------+---------+------+-------+-------+-----\n`;
-        d.exercises.forEach(ex => {
-          const pad = (s, len) => String(s).padEnd(len);
-          daysBlock += `  ${pad(ex.num,2)} | ${pad(ex.name,23)} | ${pad(ex.warmup,7)} | ${pad(ex.sets,4)} | ${pad(ex.reps,5)} | ${pad(ex.load,5)} | ${ex.rest}\n`;
-        });
-      } else {
-        daysBlock += `  Exercises: Not filled\n`;
-      }
-      daysBlock += `  Cardio  : ${d.cardio}\n`;
-    });
-  } else {
-    for (let i = 1; i <= 7; i++) {
-      daysBlock += `\n  Day ${i} — ${DAY_NAMES[i-1]}: Missing\n`;
-    }
-  }
-
-  const supps = n.supps || ['None','None','None','None'];
-
-  const vars = `[CLIENT CORE]
-{{CLIENT_NAME}}     = ${safe(p.name)}
-{{CLIENT_SUBTITLE}} = ${subtitle}
-{{AGE}}             = ${miss(p.age)}
-{{GENDER}}          = ${miss(p.gender)}
-
-[BODY STATS]
-{{HEIGHT}}          = ${miss(p.height)} cm
-{{START_WEIGHT}}    = ${miss(p.currentWeight)} kg
-{{CURRENT_WEIGHT}}  = ${miss(p.currentWeight)} kg
-{{TARGET_WEIGHT}}   = ${miss(p.targetWeight)} kg
-{{TOTAL_CHANGE}}    = ${diffStr}
-{{PROGRAM_DURATION}}= 12 Weeks
-
-[GOAL SYSTEM]
-{{GOAL_TYPE}}       = ${miss(p.goalType)}
-{{ACTIVITY_LEVEL}}  = ${miss(p.activity)}
-{{WHY_START}}       = ${miss(p.motivation)}
-
-[TRAINING SYSTEM]
-{{WORKOUT_SPLIT}}   = ${miss(t.splitName)}
-{{TRAINING_DAYS}}   = ${t.trainingDays || miss(p.trainingDays)} days/week
-{{REST_DAYS}}       = ${t.restDays !== undefined ? t.restDays : (7 - parseInt(p.trainingDays || 0))} days/week
-{{ENVIRONMENT}}     = ${miss(p.environment)}
-{{EQUIPMENT}}       = ${miss(p.equipment)}
-{{SHEET_LINK}}      = ${miss(t.tableLink)}
-
-[SPLIT OVERVIEW — FULL PROGRAM]
-${daysBlock}
-[NUTRITION SYSTEM]
-{{DIET_NAME}}       = ${miss(n.dietName)}
-{{DIET_TYPE}}       = ${miss(n.dietType)}
-{{DIET_APPROACH}}   = ${miss(n.dietApproach)}
-{{DIET_DESC}}       = ${miss(n.dietDesc)}
-{{MEAL_COUNT}}      = ${mealCount || miss('')} meals/day
-
-[MEAL PLAN]
-${mealsBlock}
-[SUPPLEMENTS]
-{{SUPP_1}}          = ${supps[0]}
-{{SUPP_2}}          = ${supps[1]}
-{{SUPP_3}}          = ${supps[2]}
-{{SUPP_4}}          = ${supps[3]}
-
-[DAILY GUIDE]
-{{PRE_WORKOUT}}     = ${miss(n.preWorkout)}
-{{POST_WORKOUT}}    = ${miss(n.postWorkout)}
-{{HYDRATION}}       = ${miss(n.hydration)}
-{{SLEEP}}           = ${miss(n.sleep)}
-{{COACHING_NOTES}}  = ${miss(n.adherence)}
-
-[MEDICAL]
-{{MEDICAL}}         = ${miss(p.medical)}
-
-[PROGRESS TRACKING]
-{{WEIGH_IN_PROTOCOL}} = Weekly — Monday, fasted, same conditions
-{{REVIEW_CYCLE}}      = Every 4 weeks
-{{WEIGHT_LOG}}        = Track current vs target weekly`;
-
-  state.masterVars = vars;
-
-  const highlighted = vars
-    .replace(/(\[.+?\])/g, '<span class="var-section">$1</span>')
-    .replace(/({{.+?}})/g, '<span class="var-key">$1</span>')
-    .replace(/= (Missing)/g, '= <span class="var-missing">Missing</span>')
-    .replace(/= (Not used)/g, '= <span class="var-missing">Not used</span>');
-
-  document.getElementById('varsContent').innerHTML = highlighted;
-  document.getElementById('varsBox').style.display = 'block';
-  document.getElementById('varsBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  state.completedSteps.add(6);
-}
-
-// ════════════════════════════════════════════════════
-// STEP 7 — INJECT INTO PORTAL
-// ════════════════════════════════════════════════════
-function injectPortal() {
-  if (!state.masterVars) { showToast('Generate Master Variables first', 'var(--accent3)'); return; }
-
-  const p = state.profile;
-  const clientLine = p.name ? `Client: ${p.name} — ${p.goalType || 'Coaching'} Phase` : 'Client: [Unknown]';
-
-  const portalTemplate = `[SYSTEM MODE: STRICT VARIABLE ENGINE]
-[${clientLine}]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-You are a deterministic variable substitution engine inside the Mario Aziz Coaching Server.
-DO NOT generate. DO NOT rewrite. DO NOT interpret. DO NOT modify structure.
-
-━━━━━━━━━━━━━━━━━━━━━━━
-PORTAL INJECTION — VARIABLES MAP
-━━━━━━━━━━━━━━━━━━━━━━━
-
-${state.masterVars}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-HARD RULES
-━━━━━━━━━━━━━━━━━━━━━━━
-- No changes outside variables
-- No rephrasing or paraphrasing
-- No structural or formatting changes
-- No additions or deletions of any kind
-- No explanations or commentary
-- 1:1 exact substitution only
-- If any variable is marked "Missing", leave {{VARIABLE}} unchanged in output
-
-━━━━━━━━━━━━━━━━━━━━━━━
-OUTPUT INSTRUCTION
-━━━━━━━━━━━━━━━━━━━━━━━
-Return the final portal block with all {{VARIABLES}} replaced by their exact values listed above.
-Execute.`;
-
-  document.getElementById('portalContent').textContent = portalTemplate;
-  document.getElementById('portalBox').style.display = 'block';
-  document.getElementById('portalBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  state.completedSteps.add(7);
-
-  // Mark all completed steps in nav
-  document.querySelectorAll('.step-item').forEach(item => {
-    const s = parseInt(item.dataset.step);
-    if (state.completedSteps.has(s) && s !== state.currentStep) {
-      item.classList.add('done');
-      item.querySelector('.step-num').textContent = '✓';
-    }
-  });
-}
-
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // UTILITIES
-// ════════════════════════════════════════════════════
-function v(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-function copyText(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const text = el.innerText || el.textContent;
+// ══════════════════════════════════════════════
+function copyPrompt(id, btn) {
+  const text = document.getElementById(id)?.textContent || '';
   const doCopy = () => {
     showToast('Copied ✓');
-    if (btn) {
-      const orig = btn.textContent;
-      btn.textContent = '✓ Copied';
-      setTimeout(() => btn.textContent = orig, 2000);
-    }
+    if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = 'Copy', 2000); }
   };
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(doCopy).catch(() => fallbackCopy(text, doCopy));
@@ -2042,8 +1313,7 @@ function fallbackCopy(text, cb) {
   ta.value = text;
   ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
   document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
+  ta.focus(); ta.select();
   try { document.execCommand('copy'); cb(); } catch(e) {}
   document.body.removeChild(ta);
 }
@@ -2057,55 +1327,10 @@ function showToast(msg, color) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-function resetSystem() {
-  if (!confirm('Reset the entire system? All data will be cleared.')) return;
+function resetAll() {
+  if (!confirm('Reset everything? All data will be cleared.')) return;
   location.reload();
 }
-
-/* ══════════════════════════════════════════
-   EXERCISE LIST SYSTEM — Smart Selection
-   ══════════════════════════════════════════ */
-const EXERCISE_LISTS = {
-  "A": ["(Chest) Barbell Flat Bench Press", "(Chest) Barbell Incline Bench Press", "(Chest) Dumbbell Flat Bench Press", "(Chest) Dumbbell Incline Bench Press", "(Chest) Dumbbell Incline Bench Fly", "(Chest) Dumbbell Decline Bench Press", "(Chest) Machine Chest Press", "(Chest) Machine Butterfly", "(Chest) Cable Crossover (High Angle)", "(Chest) Cable Crossover (Low Angle)", "(Chest) Cable Chest Press (Seated)", "(Chest) Cable Flat Bench Fly", "(Chest) Cable Incline Bench Fly", "(Chest) Cable Incline Bench Press", "(Chest) Body Weight Push-Up", "(Chest) Body Weight Incline Push-Up", "(Chest) Body Weight Decline Push-Up", "(Chest) Body Weight Dip", "(Chest) Smith Machine Bench Press", "(Chest) Smith Machine Incline Bench Press", "(Chest) Machine Chest Press", "(Chest) Machine Incline Chest Press", "(Chest) Machine Decline Chest Press", "(Back) Cable Mag-Bar Lat Pull-Down", "(Back) Cable V-Bar Lat Pull-Down", "(Back) Cable Wide-Grip Lat Pull-Down", "(Back) Cable Row Mag-Bar (Seated)", "(Back) Cable V-Bar (Seated)", "(Back) Cable Wide-Grip (Seated)", "(Back) Barbell Bent Over Row", "(Back) Barbell Chest-Supported T-Bar Row", "(Back) Barbell Shrug", "(Back) Dumbbell Shrug", "(Back) Dumbbell Bent Over Row", "(Back) Machine Chest Supported Row", "(Back) Machine Back Extension", "(Back) Cable Pull Over", "(Back) Machine Shrug", "(Back) Weighted Pull-Up", "(Back) Back Extension ", "(Shoulders) Barbell Push Press", "(Shoulders) Barbell Seated Shoulder Press", "(Shoulders) Barbell Standing Shoulder Press", "(Shoulders) Barbell One-Arm Linear Jammer", "(Shoulders) Dumbbell Push Press", "(Shoulders) Dumbbell Front Raise", "(Shoulders) Dumbbell One-Arm Lateral Raise", "(Shoulders) Dumbbell Side Lateral Raise", "(Shoulders) Machine Lateral Raise", "(Shoulders) Machine Reverse Fly", "(Shoulders) Machine Shoulder Press", "(Shoulders) Cable Face Pull", "(Shoulders) Cable Front Raise", "(Shoulders) Cable Lateral Raise", "(Shoulders) Cable Rear Delt Fly", "(Shoulders) Smith Machine Shoulder Press", "(Triceps) Barbell Overhead Triceps Extension", "(Triceps) Cable Straight-Bar Triceps Push-Down", "(Triceps) Cable Rope Triceps Push-Down", "(Triceps) Cable One-Arm  Push-Down  ", "(Triceps) Cable Overhead Triceps Extension", "(Triceps) Dumbbell Overhead Triceps Extension", "(Triceps) Machine Triceps Extension", "(Triceps) Machine Assisted Dips (Triceps Variation)", "(Triceps) Body Weight Dips (Triceps Variation)", "(Biceps) Barbell Close-Grip Biceps Curl", "(Biceps) Barbell Regular-Grip Biceps Curl", "(Biceps) Barbell Reverse-Grip Biceps Curl", "(Biceps) Barbell Wide-Grip Biceps Curl", "(Biceps) Barbell Preacher Biceps Curl", "(Biceps) Cable Bar Biceps Curl", "(Biceps) Cable Incline Bench Biceps Curl", "(Biceps) Cable One-Arm Biceps Curl", "(Biceps) Cable Rope Biceps Curl", "(Biceps) Dumbbell Alternate Biceps Curl", "(Biceps) Dumbbell Incline Bench Biceps Curl", "(Biceps) Dumbbell Hammer Biceps Curl", "(Biceps) Dumbbell One-Arm Biceps Curl", "(Biceps) Dumbbell Preacher Biceps Curl", "(Biceps) Dumbbell Reverse-Grip Biceps Curl", "(Biceps) Machine Biceps Curl", "(Biceps) Machine Preacher Biceps Curl", "(Abs) Body Weight Ab Crunch", "(Abs) Body Weight Hanging Leg Raise", "(Abs) Body Weight Plank", "(Abs) Dumbbell Ab Twist", "(Abs) Machine Ab Crunch", "(Abs) Cable Knee", "(Abs) Weighted Plank", "(Abs) Barbell Wrist Curl", "(Quadriceps) Barbell Squat", "(Quadriceps) Barbell Jump Squat", "(Quadriceps)Barbell Step Up", "(Quadriceps) Dumbbell Body Weight Squat", "(Quadriceps) Dumbbell Goblet Squat", "(Quadriceps) Dumbbell Standing Lunge", "(Quadriceps) Addaction", "(Quadriceps) Abdaction", "(Quadriceps) Machine Hack Squat", "(Quadriceps) Machine Laying Leg Press", "(Quadriceps) Machine Leg Press", "(Quadriceps) Machine Seated Leg Press", "(Quadriceps) Body Weight Squat", "(Quadriceps) Body Weight Standing Lunge", "(Quadriceps)  Body Weight Step Up", "(Quadriceps) Body Weight Walking Lunge", "(Hamstrings) Barbell Deadlift", "(Hamstrings) Barbell Deadlifts from Blocks", "(Hamstrings) Barbell Deadlifts from Deficit", "(Hamstrings) Barbell Hip Thrust", "(Hamstrings) Barbell Sumo Deadlift", "(Hamstrings) Barbell Romanian Deadlift", "(Hamstrings) Body Weight Glute-Ham Raise", "(Hamstrings) Cable One-Legged Kickback", "(Hamstrings) Dumbbell Glute Bridge", "(Hamstrings) Dumbbell Hip Thrust", "(Hamstrings) Dumbbell Deadlift", "(Hamstrings) Machine Glute-Ham Raise", "(Hamstrings) Machine Laying Leg Curl", "(Calves) Barbell Calf Raise", "(Calves) Dumbbell Calf Raise", "(Calves) Machine Calf Extension (Seated)", "(Calves) Machine Calf Raise", "(Calves) Machine Calf Extension (Seated/Laying)"],
-  "B": ["(Chest) Push-ups (standard)", "(Chest) Push-ups (incline)", "(Chest) Push-ups (decline)", "(Chest) Push-ups (close-grip)", "(Chest) Wide-arm Push-ups", "(Chest) Archer Push-ups", "(Chest) Pseudo Planche Push-ups", "(Chest) Clapping Push-ups", "(Chest) Typewriter Push-ups", "(Chest) Wall Push-ups", "(Chest) Explosive Push-ups", "(Chest) Hindu Push-ups", "(Chest) Plyometric Push-ups", "(Shoulders) Pike Push-ups", "(Shoulders) Elevated Pike Push-ups", "(Shoulders) Wall Walks", "(Shoulders) Handstand Hold", "(Shoulders) Handstand Push-ups", "(Shoulders) Shoulder Taps", "(Shoulders) Arm Circles", "(Shoulders) Dive Bomber Push-ups", "(Shoulders) Lateral Arm Raises", "(Shoulders) Y-T-W Raises", "(Back) Superman Raises", "(Back) Reverse Snow Angels", "(Back) Bodyweight Rows", "(Back) Doorframe Rows", "(Back) Prone I-Y-T Lifts", "(Back) Arch Hold", "(Back) Swimmers", "(Biceps) Isometric Towel Curls", "(Biceps) Doorframe Rows (palms-up)", "(Biceps) Chin-ups", "(Biceps) Towel Rows", "(Triceps) Diamond Push-ups", "(Triceps) Triceps Dips", "(Triceps) Close-Grip Push-ups", "(Triceps) Cobra Push-ups", "(Triceps) Incline Triceps Extensions", "(Triceps) Bodyweight Triceps Extensions", "(Core) Planks", "(Core) Side Planks", "(Core) Plank Shoulder Taps", "(Core) L-Sit", "(Core) Hollow Body Hold", "(Core) Flutter Kicks", "(Core) Leg Raises", "(Core) Bicycle Crunches", "(Core) V-ups", "(Core) Mountain Climbers", "(Core) Dead Bugs", "(Core) Dragon Flags", "(Core) Russian Twists", "(Core) Seated Knee Tucks", "(Quadriceps) Step-ups", "(Quadriceps) Jump Squats", "(Quadriceps) Bodyweight Squats", "(Quadriceps) Split Squats", "(Quadriceps) Bulgarian Split Squats", "(Quadriceps) Wall Sit", "(Quadriceps) Sissy Squats", "(Glutes) Glute Bridges", "(Glutes) Hip Thrusts", "(Glutes) Single-leg Glute Bridges", "(Glutes) Pistol Squats", "(Glutes) Assisted Pistol Squats", "(Glutes) Curtsy Lunges", "(Glutes) Lateral Lunges", "(Hamstrings) Hamstring Slides", "(Hamstrings) Good Mornings", "(Hamstrings) Glute Marches", "(Hamstrings) Single-Leg Romanian Deadlifts", "(Calves) Standing Calf Raises", "(Calves) Seated Calf Raises", "(Calves) Explosive Calf Jumps", "(Calves) Calf Raise"],
-  "C": ["(Chest) Wall Push-ups", "(Chest) Push-ups", "(Chest) Knee Push-ups", "(Shoulders) Incline Pike Push-ups", "(Shoulders) Wall Shoulder Taps", "(Shoulders) Elevated Arm Circles (seated or supported)", "(Shoulders) Seated Lateral Arm Raises", "(Shoulders) Supported Y-T-W Raises", "(Back) Incline Bodyweight Rows", "(Back) Doorframe Rows (bent knees)", "(Back) Prone Arm Lifts", "(Back) Arch Hold (shorter time)", "(Back) Swimmers (slower pace)", "(Biceps) Assisted Towel Curls", "(Biceps) Incline Doorframe Rows", "(Biceps) Chin-ups (band-assisted)", "(Biceps) Incline Towel Rows", "(Triceps) Incline Diamond Push-ups", "(Triceps) Bench Dips (knees bent)", "(Triceps) Incline Close-Grip Push-ups", "(Triceps) Incline Cobra Push-ups", "(Triceps) Wall Triceps Extensions", "(Triceps) Incline Bodyweight Triceps Extensions", "(Core) Knee Planks", "(Core) Side Knee Planks", "(Core) Knee Plank Shoulder Taps", "(Core) Tucked L-Sit", "(Core) Hollow Tuck Hold", "(Core) Flutter Kicks (higher legs)", "(Core) Bent-Knee Leg Raises", "(Core) Slow Bicycle Crunches", "(Core) Tuck-ups", "(Core) Slow Mountain Climbers", "(Core) Arm-Only Dead Bugs", "(Core) Negative Dragon Flags", "(Core) Russian Twists (feet on ground)", "(Core) Seated Alternating Knee Lifts", "(Quadriceps) Low Step-ups", "(Quadriceps) Squat to Toes", "(Quadriceps) Assisted Squats", "(Quadriceps) Shallow Split Squats", "(Quadriceps) Rear-Foot Elevated Lunge (low step)", "(Quadriceps) Wall Lean", "(Quadriceps) Partial Sissy Squats", "(Glutes) Partial Glute Bridges", "(Glutes) Glute Bridges (on floor)", "(Glutes) Single-leg Glute Bridge (assisted)", "(Glutes) Box Pistol Squats", "(Glutes) Shallow Curtsy Lunges", "(Glutes) Supported Lateral Lunges", "(Hamstrings) Partial Hamstring Slides", "(Hamstrings) Wall Hinge Drill", "(Hamstrings) Glute Bridge Hold with Leg Raise", "(Hamstrings) Supported Single-Leg Romanian Deadlifts", "(Calves) Standing Calf Raises (with support)", "(Calves) Seated Calf Raises (no weight)", "(Calves) Calf Raise to Toes (no jump)", "(Abs) Hanging Knee Raise", "(Abs) Reverse Crunch (no weight)", "(Abs) Sit-Up to Reach", "(Abs) Bodyweight Kneeling Crunch", "(Abs) Standing Band Lift", "(Abs) Hanging Bent-Knee Raise", "(Abs) Knee Plank", "(Abs) Russian Twist (no weight)", "(Abs) Seated Crunch (no machine)", "(Abs) Standard Plank", "(Quadriceps) Goblet Squat", "(Quadriceps) Bodyweight Jump Squat", "(Quadriceps) Dumbbell Step-Up", "(Quadriceps) Bodyweight Squat", "(Quadriceps) Wall-Supported Squat", "(Quadriceps) Bodyweight Lunge", "(Quadriceps) Static Lunge", "(Quadriceps) Step-up to Low Surface", "(Quadriceps) Leg Press Machine (lighter weight)", "(Quadriceps) Machine Leg Press (partial range)", "(Hamstrings) Dumbbell Romanian Deadlift", "(Hamstrings) Rack Pulls", "(Hamstrings) Standard Barbell Deadlift", "(Hamstrings) Hip Thrust", "(Hamstrings) Sumo Deadlift", "(Hamstrings) Assisted Glute-Ham Raise", "(Hamstrings) Band Kickback", "(Hamstrings) Bodyweight Glute Bridge", "(Hamstrings) Bodyweight Hip Thrust", "(Hamstrings) Dumbbell Good Morning", "(Hamstrings) Machine Glute-Ham Raise (partial)", "(Hamstrings) Machine Leg Curl (light)", "(Calves) Calf Raise", "(Calves) Bodyweight Calf Raise", "(Calves) Seated Calf Raise (no weight)", "(Calves) Standing Calf Raise (no machine)"]
-};
-
-function buildExerciseCell(dayN, rowR) {
-  var listId = "day" + dayN + "_ex" + rowR + "_list";
-  var nameId = "day" + dayN + "_ex" + rowR + "_name";
-  return '<div class="ex-smart-wrap">' +
-    '<select class="ex-list-sel" id="' + listId + '" onchange="updateExerciseDropdown(\'' + listId + '\',\'' + nameId + '\')" title="List">' +
-      '<option value="">—</option>' +
-      '<option value="A">A</option>' +
-      '<option value="B">B</option>' +
-      '<option value="C">C</option>' +
-    '</select>' +
-    '<select class="ex-name-sel" id="' + nameId + '">' +
-      '<option value="">Select exercise…</option>' +
-    '</select>' +
-  '</div>';
-}
-
-function updateExerciseDropdown(listId, nameId) {
-  var listSel = document.getElementById(listId);
-  var nameSel = document.getElementById(nameId);
-  if (!listSel || !nameSel) return;
-  var key = listSel.value;
-  var prevVal = nameSel.value;
-  nameSel.innerHTML = '<option value="">Select exercise…</option>';
-  if (key && EXERCISE_LISTS[key]) {
-    EXERCISE_LISTS[key].forEach(function(ex) {
-      var opt = document.createElement('option');
-      opt.value = ex;
-      opt.textContent = ex;
-      nameSel.appendChild(opt);
-    });
-    if (prevVal && EXERCISE_LISTS[key].includes(prevVal)) nameSel.value = prevVal;
-  }
-}
-/* ══════════════════════════════════════════ */
-
 </script>
 </body>
 </html>
