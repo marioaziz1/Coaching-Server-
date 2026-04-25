@@ -260,6 +260,50 @@
     line-height: 1.65;
   }
 
+  /* ─── INTAKE SECTION GROUPS ─── */
+  .intake-section {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    background: var(--surface);
+  }
+  .intake-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .intake-section-num {
+    font-family: var(--mono);
+    font-size: 9px;
+    background: rgba(200,255,87,0.08);
+    color: var(--accent);
+    border: 1px solid rgba(200,255,87,0.2);
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .intake-section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    flex: 1;
+  }
+  .intake-section-title::after {
+    content: '';
+    display: inline-block;
+    height: 1px;
+    width: 100%;
+    background: var(--border);
+    vertical-align: middle;
+    margin-left: 10px;
+  }
+
   /* ─── FORM ─── */
   .block-label {
     font-family: var(--mono);
@@ -309,7 +353,7 @@
   label .opt { color: var(--text-dim); font-size: 9px; letter-spacing: 0.04em; }
 
   input[type=text], input[type=number], select, textarea {
-    background: var(--surface);
+    background: var(--surface2);
     border: 1px solid var(--border2);
     color: var(--text);
     padding: 10px 14px;
@@ -323,12 +367,16 @@
   }
   input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus {
     border-color: var(--accent);
-    background: var(--surface2);
+    background: var(--surface3);
     box-shadow: 0 0 0 3px rgba(200,255,87,0.07);
   }
   input::placeholder, textarea::placeholder { color: var(--text-dim); }
   select option { background: #18181d; }
   textarea { resize: vertical; min-height: 80px; }
+
+  /* hidden conditional */
+  .cond-field { display: none; }
+  .cond-field.visible { display: flex; }
 
   /* ─── BUTTONS ─── */
   .btn {
@@ -417,8 +465,7 @@
     background: var(--accent2);
     box-shadow: 0 0 6px var(--accent2);
   }
-  .output-label.nutrition::before { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .output-label.training::before  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .output-label.unified::before { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
   .output-content {
     padding: 22px;
     font-family: var(--mono);
@@ -426,7 +473,7 @@
     line-height: 1.85;
     color: #a0a0c0;
     white-space: pre-wrap;
-    max-height: 460px;
+    max-height: 560px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border2) transparent;
@@ -502,6 +549,7 @@
     .profile-card { grid-template-columns: 1fr 1fr; }
     .section-title { font-size: 24px; }
     .smart-toggle-label { display: none; }
+    .intake-section { padding: 16px; }
   }
 </style>
 </head>
@@ -547,145 +595,514 @@
 <div class="main-wrap">
 
 <!-- ═══════════════════════════
-     STEP 1 — CLIENT INPUT
+     STEP 1 — ELITE INTAKE
 ═══════════════════════════ -->
 <div class="section active" id="step1">
   <div class="section-header">
     <div class="section-tag">Step 01</div>
-    <h1 class="section-title">Client Input</h1>
-    <p class="section-desc">Enter client data. Fields marked <span style="color:var(--accent3)">*</span> are required. All others are optional.</p>
+    <h1 class="section-title">Elite Client Intake</h1>
+    <p class="section-desc">Complete all 10 sections. Fields marked <span style="color:var(--accent3)">*</span> are required. All others are optional but improve output quality.</p>
   </div>
 
-  <!-- Identity -->
-  <div class="block-label">Identity</div>
-  <div class="form-grid">
-    <div class="field span2">
-      <label>Full Name <span class="req">*</span></label>
-      <input type="text" id="p_name" placeholder="Client full name">
+  <!-- ── 01 IDENTITY & BODY METRICS ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">01</span>
+      <span class="intake-section-title">Identity &amp; Body Metrics</span>
     </div>
-    <div class="field">
-      <label>Age <span class="req">*</span></label>
-      <input type="number" id="p_age" placeholder="e.g. 28" min="14" max="90">
-    </div>
-    <div class="field">
-      <label>Gender <span class="req">*</span></label>
-      <select id="p_gender">
-        <option value="">— Select —</option>
-        <option>Male</option>
-        <option>Female</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Body Stats</div>
-  <div class="form-grid cols3">
-    <div class="field">
-      <label>Height (cm) <span class="req">*</span></label>
-      <input type="number" id="p_height" placeholder="e.g. 175">
-    </div>
-    <div class="field">
-      <label>Current Weight (kg) <span class="req">*</span></label>
-      <input type="number" id="p_current_weight" placeholder="e.g. 85">
-    </div>
-    <div class="field">
-      <label>Target Weight (kg) <span class="req">*</span></label>
-      <input type="number" id="p_target_weight" placeholder="e.g. 72">
-    </div>
-  </div>
-
-  <div class="block-divider"></div>
-  <div class="block-label">Goal & Activity</div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Goal Type <span class="req">*</span></label>
-      <select id="p_goal_type">
-        <option value="">— Select —</option>
-        <option value="Fat Loss">Fat Loss</option>
-        <option value="Muscle Gain">Muscle Gain</option>
-        <option value="Recomp">Body Recomposition</option>
-        <option value="Diabetes">Diabetes (Type 1)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Activity Level <span class="req">*</span></label>
-      <select id="p_activity">
-        <option value="">— Select —</option>
-        <option value="Sedentary">Sedentary (no exercise)</option>
-        <option value="Lightly Active">Lightly Active (1–2x/week)</option>
-        <option value="Moderately Active">Moderately Active (3–4x/week)</option>
-        <option value="Very Active">Very Active (5–6x/week)</option>
-        <option value="Extremely Active">Extremely Active (athlete/2x day)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Training Days / Week <span class="req">*</span></label>
-      <select id="p_training_days">
-        <option value="">— Select —</option>
-        <option>2</option><option>3</option><option>4</option>
-        <option>5</option><option>6</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Training Environment <span class="req">*</span></label>
-      <select id="p_environment">
-        <option value="">— Select —</option>
-        <option>Gym (full equipment)</option>
-        <option>Home (limited equipment)</option>
-        <option>Home (no equipment / bodyweight)</option>
-        <option>Hybrid (gym + home)</option>
-        <option>Outdoor</option>
-      </select>
-    </div>
-  </div>
-  <div class="form-grid col1">
-    <div class="field">
-      <label>Equipment Access <span class="opt">(optional)</span></label>
-      <input type="text" id="p_equipment" placeholder="e.g. Barbells, dumbbells, squat rack, cables, resistance bands">
+    <div class="form-grid cols3">
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="p_name" placeholder="Client full name">
+      </div>
+      <div class="field">
+        <label>Age <span class="req">*</span></label>
+        <input type="number" id="p_age" placeholder="e.g. 28" min="14" max="90">
+      </div>
+      <div class="field">
+        <label>Gender <span class="req">*</span></label>
+        <select id="p_gender">
+          <option value="">— Select —</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Height (cm) <span class="req">*</span></label>
+        <input type="number" id="p_height" placeholder="e.g. 175">
+      </div>
+      <div class="field">
+        <label>Weight (kg) <span class="req">*</span></label>
+        <input type="number" id="p_current_weight" placeholder="e.g. 85">
+      </div>
+      <div class="field">
+        <label>Body Fat % <span class="opt">(opt)</span></label>
+        <input type="number" id="p_body_fat" placeholder="e.g. 22">
+      </div>
+      <div class="field">
+        <label>Waist (cm) <span class="opt">(opt)</span></label>
+        <input type="number" id="p_waist" placeholder="e.g. 88">
+      </div>
     </div>
   </div>
 
-  <div class="block-divider"></div>
-  <div class="block-label">Nutrition Preferences</div>
-  <div class="form-grid">
-    <div class="field">
-      <label>Dietary Preferences / Restrictions <span class="opt">(optional)</span></label>
-      <input type="text" id="p_diet_pref" placeholder="e.g. No pork, lactose-free, high protein">
+  <!-- ── 02 PRIMARY OBJECTIVE ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">02</span>
+      <span class="intake-section-title">Primary Objective</span>
     </div>
-    <div class="field">
-      <label>Disliked Foods <span class="opt">(optional)</span></label>
-      <input type="text" id="p_unpreferred_foods" placeholder="e.g. Liver, beans, broccoli">
-    </div>
-    <div class="field">
-      <label>Weekly Food Budget (EGP) <span class="opt">(optional)</span></label>
-      <input type="number" id="p_budget" placeholder="e.g. 500">
-    </div>
-    <div class="field">
-      <label>Meals Per Day <span class="opt">(optional)</span></label>
-      <select id="p_meals_per_day">
-        <option value="">— Select —</option>
-        <option>1</option><option>2</option><option>3</option>
-        <option>4</option><option>5</option>
-      </select>
+    <div class="form-grid">
+      <div class="field">
+        <label>Main Goal <span class="req">*</span></label>
+        <select id="p_goal_type">
+          <option value="">— Select —</option>
+          <option value="Fat Loss">Fat Loss</option>
+          <option value="Muscle Gain">Muscle Gain</option>
+          <option value="Recomp">Body Recomposition</option>
+          <option value="Diabetes">Diabetes (Type 1)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Secondary Goal <span class="opt">(opt)</span></label>
+        <input type="text" id="p_secondary_goal" placeholder="e.g. Improve endurance, fix posture">
+      </div>
+      <div class="field">
+        <label>Target Weight (kg) <span class="req">*</span></label>
+        <input type="number" id="p_target_weight" placeholder="e.g. 72">
+      </div>
+      <div class="field">
+        <label>Deadline <span class="opt">(opt)</span></label>
+        <input type="text" id="p_deadline" placeholder="e.g. 3 months, wedding in June">
+      </div>
+      <div class="field">
+        <label>Priority Level (1–10) <span class="opt">(opt)</span></label>
+        <select id="p_priority">
+          <option value="">— Select —</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="block-divider"></div>
-  <div class="block-label">Health & Motivation</div>
-  <div class="form-grid col1">
-    <div class="field">
-      <label>Medical Conditions / Injuries / Limitations <span class="opt">(optional)</span></label>
-      <textarea id="p_medical" placeholder="e.g. Lower back pain, knee issue, Type 1 diabetes, no overhead pressing"></textarea>
+  <!-- ── 03 CURRENT CONDITION SNAPSHOT ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">03</span>
+      <span class="intake-section-title">Current Condition Snapshot</span>
     </div>
-    <div class="field">
-      <label>Client Motivation — WHY are they starting? <span class="req">*</span></label>
-      <textarea id="p_motivation" placeholder="e.g. Wedding in 4 months, doctor's recommendation, low energy, build confidence"></textarea>
+    <div class="form-grid">
+      <div class="field">
+        <label>Fitness Level <span class="req">*</span></label>
+        <select id="p_fitness_level">
+          <option value="">— Select —</option>
+          <option>Beginner (0–6 months)</option>
+          <option>Intermediate (6–24 months)</option>
+          <option>Advanced (2+ years consistent)</option>
+          <option>Athlete</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Strength Level <span class="opt">(opt)</span></label>
+        <select id="p_strength_level">
+          <option value="">— Select —</option>
+          <option>Very Weak</option><option>Below Average</option><option>Average</option>
+          <option>Above Average</option><option>Strong</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cardio Level <span class="opt">(opt)</span></label>
+        <select id="p_cardio_level">
+          <option value="">— Select —</option>
+          <option>Very Poor</option><option>Poor</option><option>Average</option>
+          <option>Good</option><option>Excellent</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Mobility <span class="opt">(opt)</span></label>
+        <select id="p_mobility">
+          <option value="">— Select —</option>
+          <option>Poor — significant restrictions</option>
+          <option>Below average — some tightness</option>
+          <option>Average</option>
+          <option>Good — flexible</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Energy Levels <span class="opt">(opt)</span></label>
+        <select id="p_energy_levels">
+          <option value="">— Select —</option>
+          <option>Very Low — exhausted daily</option>
+          <option>Low — frequently tired</option>
+          <option>Moderate</option>
+          <option>High — consistently energetic</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Activity Level <span class="req">*</span></label>
+        <select id="p_activity">
+          <option value="">— Select —</option>
+          <option value="Sedentary">Sedentary (no exercise)</option>
+          <option value="Lightly Active">Lightly Active (1–2x/week)</option>
+          <option value="Moderately Active">Moderately Active (3–4x/week)</option>
+          <option value="Very Active">Very Active (5–6x/week)</option>
+          <option value="Extremely Active">Extremely Active (athlete/2x day)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 04 TRAINING ENVIRONMENT ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">04</span>
+      <span class="intake-section-title">Training Environment</span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Training Days / Week <span class="req">*</span></label>
+        <select id="p_training_days">
+          <option value="">— Select —</option>
+          <option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Session Duration <span class="opt">(opt)</span></label>
+        <select id="p_session_duration">
+          <option value="">— Select —</option>
+          <option>30–45 min</option><option>45–60 min</option>
+          <option>60–75 min</option><option>75–90 min</option><option>90+ min</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Training Environment <span class="req">*</span></label>
+        <select id="p_environment">
+          <option value="">— Select —</option>
+          <option>Gym (full equipment)</option>
+          <option>Home (limited equipment)</option>
+          <option>Home (no equipment / bodyweight)</option>
+          <option>Hybrid (gym + home)</option>
+          <option>Outdoor</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Preferred Style <span class="opt">(opt)</span></label>
+        <select id="p_preferred_style">
+          <option value="">— Select —</option>
+          <option>Strength-focused</option><option>Hypertrophy-focused</option>
+          <option>Circuit / Metabolic</option><option>HIIT</option>
+          <option>Calisthenics</option><option>Sport-specific</option><option>No preference</option>
+        </select>
+      </div>
+      <div class="field span2">
+        <label>Equipment Access <span class="opt">(opt)</span></label>
+        <input type="text" id="p_equipment" placeholder="e.g. Barbells, dumbbells, squat rack, cables, resistance bands">
+      </div>
+      <div class="field span2">
+        <label>Training Limitations <span class="opt">(opt)</span></label>
+        <input type="text" id="p_training_limitations" placeholder="e.g. No early mornings, limited to 45 min, no machines">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 05 INJURY & POSTURE PROFILE ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">05</span>
+      <span class="intake-section-title">Injury &amp; Posture Profile</span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Current Injuries <span class="opt">(opt)</span></label>
+        <input type="text" id="p_injuries" placeholder="e.g. Right shoulder impingement, lower back">
+      </div>
+      <div class="field">
+        <label>Pain Areas <span class="opt">(opt)</span></label>
+        <input type="text" id="p_pain" placeholder="e.g. Knee pain on squatting, neck tightness">
+      </div>
+      <div class="field">
+        <label>Movement Restrictions <span class="opt">(opt)</span></label>
+        <input type="text" id="p_restrictions" placeholder="e.g. No overhead pressing, limited hip flexion">
+      </div>
+      <div class="field">
+        <label>Posture Issues <span class="opt">(opt)</span></label>
+        <input type="text" id="p_posture" placeholder="e.g. Forward head, anterior pelvic tilt, rounded shoulders">
+      </div>
+      <div class="field span2">
+        <label>Previous Injuries <span class="opt">(opt)</span></label>
+        <input type="text" id="p_prev_injuries" placeholder="e.g. ACL tear 2019 (fully recovered), disc herniation L4–L5">
+      </div>
+    </div>
+    <div class="form-grid col1">
+      <div class="field">
+        <label>Medical Conditions <span class="opt">(opt)</span></label>
+        <textarea id="p_medical" placeholder="e.g. Type 1 diabetes, hypertension, thyroid disorder — any diagnosed condition relevant to training or nutrition"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 06 LIFESTYLE ANALYSIS ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">06</span>
+      <span class="intake-section-title">Lifestyle Analysis</span>
+    </div>
+    <div class="form-grid cols3">
+      <div class="field">
+        <label>Daily Steps <span class="opt">(opt)</span></label>
+        <select id="p_steps">
+          <option value="">— Select —</option>
+          <option>&lt; 2,000 (mostly seated)</option>
+          <option>2,000–5,000</option>
+          <option>5,000–8,000</option>
+          <option>8,000–12,000</option>
+          <option>12,000+ (very active)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Job Type <span class="opt">(opt)</span></label>
+        <select id="p_job_type">
+          <option value="">— Select —</option>
+          <option>Desk job / sedentary</option>
+          <option>Standing / light movement</option>
+          <option>Physical / manual labor</option>
+          <option>Student</option>
+          <option>Not working</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sleep Hours / Night <span class="opt">(opt)</span></label>
+        <select id="p_sleep_hours">
+          <option value="">— Select —</option>
+          <option>&lt; 5 hours</option><option>5–6 hours</option>
+          <option>6–7 hours</option><option>7–8 hours</option><option>8+ hours</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sleep Quality <span class="opt">(opt)</span></label>
+        <select id="p_sleep_quality">
+          <option value="">— Select —</option>
+          <option>Very poor — frequent waking</option>
+          <option>Poor — unrefreshing</option>
+          <option>Average</option>
+          <option>Good — rested most days</option>
+          <option>Excellent</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Stress Level <span class="opt">(opt)</span></label>
+        <select id="p_stress">
+          <option value="">— Select —</option>
+          <option>Low</option><option>Moderate</option>
+          <option>High</option><option>Extremely High</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Water Intake <span class="opt">(opt)</span></label>
+        <select id="p_water">
+          <option value="">— Select —</option>
+          <option>&lt; 1L / day</option>
+          <option>1–1.5L / day</option>
+          <option>1.5–2.5L / day</option>
+          <option>2.5–3.5L / day</option>
+          <option>3.5L+ / day</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 07 NUTRITION INTELLIGENCE ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">07</span>
+      <span class="intake-section-title">Nutrition Intelligence</span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Eating Pattern <span class="opt">(opt)</span></label>
+        <select id="p_eating_pattern">
+          <option value="">— Select —</option>
+          <option>3 structured meals</option>
+          <option>Multiple small meals / grazing</option>
+          <option>Intermittent fasting</option>
+          <option>Skipping meals (irregular)</option>
+          <option>No consistent pattern</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Diet Type <span class="opt">(opt)</span></label>
+        <select id="p_diet_type">
+          <option value="">— Select —</option>
+          <option>No restrictions (omnivore)</option>
+          <option>No pork</option>
+          <option>No red meat</option>
+          <option>Vegetarian</option>
+          <option>Vegan</option>
+          <option>Lactose-free</option>
+          <option>Gluten-free</option>
+          <option>Custom (see dietary notes)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Meals Per Day <span class="opt">(opt)</span></label>
+        <select id="p_meals_per_day">
+          <option value="">— Select —</option>
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Hunger Pattern <span class="opt">(opt)</span></label>
+        <select id="p_hunger_pattern">
+          <option value="">— Select —</option>
+          <option>Always hungry</option>
+          <option>Hungry in mornings</option>
+          <option>Hungry at night</option>
+          <option>Appetite varies</option>
+          <option>Rarely hungry</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Favorite Foods <span class="opt">(opt)</span></label>
+        <input type="text" id="p_fav_foods" placeholder="e.g. Rice, chicken, eggs, foul, koshary">
+      </div>
+      <div class="field">
+        <label>Disliked Foods <span class="opt">(opt)</span></label>
+        <input type="text" id="p_unpreferred_foods" placeholder="e.g. Liver, beans, broccoli">
+      </div>
+      <div class="field">
+        <label>Allergies <span class="opt">(opt)</span></label>
+        <input type="text" id="p_allergies" placeholder="e.g. Lactose, nuts, shellfish">
+      </div>
+      <div class="field">
+        <label>Weekly Food Budget (EGP) <span class="opt">(opt)</span></label>
+        <input type="number" id="p_budget" placeholder="e.g. 500">
+      </div>
+      <div class="field">
+        <label>Dietary Consistency <span class="opt">(opt)</span></label>
+        <select id="p_consistency">
+          <option value="">— Select —</option>
+          <option>Very inconsistent — rarely follows plans</option>
+          <option>Inconsistent — follows 40–60% of the time</option>
+          <option>Moderate — follows most of the time</option>
+          <option>High — very consistent</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 08 ADVANCED NUTRITION CONTROL ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">08</span>
+      <span class="intake-section-title">Advanced Nutrition Control</span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Carb Cycling <span class="opt">(opt)</span></label>
+        <select id="p_carb_cycling" onchange="onCarbCyclingChange()">
+          <option value="">— Select —</option>
+          <option value="Yes">Yes — I want carb cycling</option>
+          <option value="No">No — standard macros</option>
+        </select>
+      </div>
+      <div class="field cond-field" id="carbStructureField">
+        <label>Carb Cycle Structure <span class="opt">(opt)</span></label>
+        <select id="p_carb_structure">
+          <option value="">— Select —</option>
+          <option>High / Low (train day / rest day)</option>
+          <option>High / Medium / Low (3-tier)</option>
+          <option>Weekly refeed model</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Refeed Days <span class="opt">(opt)</span></label>
+        <select id="p_refeed">
+          <option value="">— Select —</option>
+          <option>None</option>
+          <option>1x / week</option>
+          <option>Every 2 weeks</option>
+          <option>Monthly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cheat Meals <span class="opt">(opt)</span></label>
+        <select id="p_cheat_meals">
+          <option value="">— Select —</option>
+          <option>None — fully committed</option>
+          <option>1 meal / week</option>
+          <option>1 day / week</option>
+          <option>Occasional — not scheduled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 09 SUPPLEMENTS & RECOVERY ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">09</span>
+      <span class="intake-section-title">Supplements &amp; Recovery</span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Current Supplements <span class="opt">(opt)</span></label>
+        <input type="text" id="p_supplements" placeholder="e.g. Whey protein, creatine, vitamin D">
+      </div>
+      <div class="field">
+        <label>Open to New Supplements? <span class="opt">(opt)</span></label>
+        <select id="p_open_supplements">
+          <option value="">— Select —</option>
+          <option>Yes — willing to add</option>
+          <option>No — prefer food-first</option>
+          <option>Maybe — depends on need</option>
+        </select>
+      </div>
+      <div class="field span2">
+        <label>Recovery Methods Used <span class="opt">(opt)</span></label>
+        <input type="text" id="p_recovery" placeholder="e.g. Stretching, massage, sauna, cold shower, foam rolling">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 10 PSYCHOLOGY & ADHERENCE ── -->
+  <div class="intake-section">
+    <div class="intake-section-header">
+      <span class="intake-section-num">10</span>
+      <span class="intake-section-title">Psychology &amp; Adherence</span>
+    </div>
+    <div class="form-grid col1">
+      <div class="field">
+        <label>Primary Motivation — WHY are they starting? <span class="req">*</span></label>
+        <textarea id="p_motivation" placeholder="e.g. Wedding in 4 months, doctor's recommendation, low energy, build confidence"></textarea>
+      </div>
+      <div class="field">
+        <label>Biggest Challenge <span class="opt">(opt)</span></label>
+        <textarea id="p_biggest_challenge" placeholder="e.g. Lack of time, emotional eating, inconsistency, no support"></textarea>
+      </div>
+      <div class="field">
+        <label>Past Failures <span class="opt">(opt)</span></label>
+        <textarea id="p_past_failures" placeholder="e.g. Gave up after 3 weeks, diet too restrictive, lost progress after injury"></textarea>
+      </div>
+      <div class="field">
+        <label>Preferred Coaching Style <span class="opt">(opt)</span></label>
+        <select id="p_coaching_style">
+          <option value="">— Select —</option>
+          <option>Strict &amp; structured — clear rules, no deviation</option>
+          <option>Flexible &amp; adaptive — guidelines over rules</option>
+          <option>Motivational &amp; supportive</option>
+          <option>Data-driven &amp; analytical</option>
+          <option>Minimal check-ins — autonomous</option>
+        </select>
+      </div>
     </div>
   </div>
 
   <div class="btn-row">
     <button class="btn btn-primary" onclick="generatePrompts()">
-      ⚡ Generate Prompts →
+      ⚡ Generate Elite Prompt →
     </button>
     <button class="btn btn-danger" onclick="resetAll()" style="margin-left:auto">⟲ Reset</button>
   </div>
@@ -698,34 +1115,22 @@
   <div class="section-header">
     <div class="section-tag">Step 02</div>
     <h1 class="section-title">Prompt Output</h1>
-    <p class="section-desc">Copy each prompt and paste into Claude or ChatGPT. Both prompts are generated from the same client profile.</p>
+    <p class="section-desc">Copy the unified prompt and paste into Claude or ChatGPT. The engine injects all intake data into one elite coaching system prompt.</p>
   </div>
 
   <!-- Profile Summary -->
   <div class="profile-card" id="profileCard"></div>
 
-  <!-- Nutrition Prompt -->
+  <!-- Unified Prompt -->
   <div class="prompt-box">
     <div class="output-header">
-      <span class="output-label nutrition">Nutrition Prompt</span>
+      <span class="output-label unified">Elite Coaching Engine Output</span>
       <div style="display:flex;gap:8px;align-items:center">
-        <span class="smart-badge-output" id="nutBadge">Smart</span>
-        <button class="btn btn-copy" onclick="copyPrompt('nutPromptText', this)">Copy</button>
+        <span class="smart-badge-output" id="unifiedBadge">Smart</span>
+        <button class="btn btn-copy" onclick="copyPrompt('unifiedPromptText', this)">Copy</button>
       </div>
     </div>
-    <div class="output-content" id="nutPromptText"></div>
-  </div>
-
-  <!-- Training Prompt -->
-  <div class="prompt-box">
-    <div class="output-header">
-      <span class="output-label training">Training Prompt</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="smart-badge-output" id="trainBadge">Smart</span>
-        <button class="btn btn-copy" onclick="copyPrompt('trainPromptText', this)">Copy</button>
-      </div>
-    </div>
-    <div class="output-content" id="trainPromptText"></div>
+    <div class="output-content" id="unifiedPromptText"></div>
   </div>
 
   <div class="btn-row">
@@ -752,7 +1157,7 @@ const state = {
 // ══════════════════════════════════════════════
 function navTo(n) {
   if (n === 2 && !state.profile) {
-    showToast('Generate prompts first', 'var(--accent3)');
+    showToast('Generate prompt first', 'var(--accent3)');
     return;
   }
   state.currentStep = n;
@@ -787,6 +1192,15 @@ function onSmartToggle() {
 }
 
 // ══════════════════════════════════════════════
+// CONDITIONAL LOGIC
+// ══════════════════════════════════════════════
+function onCarbCyclingChange() {
+  const val = document.getElementById('p_carb_cycling').value;
+  const field = document.getElementById('carbStructureField');
+  field.classList.toggle('visible', val === 'Yes');
+}
+
+// ══════════════════════════════════════════════
 // READ FORM
 // ══════════════════════════════════════════════
 function fv(id) {
@@ -798,9 +1212,11 @@ function fv(id) {
 // GENERATE — MAIN ENTRY
 // ══════════════════════════════════════════════
 function generatePrompts() {
-  const required = ['p_name','p_age','p_gender','p_height','p_current_weight',
-                    'p_target_weight','p_goal_type','p_activity',
-                    'p_training_days','p_environment','p_motivation'];
+  const required = [
+    'p_name','p_age','p_gender','p_height','p_current_weight',
+    'p_target_weight','p_goal_type','p_activity',
+    'p_training_days','p_environment','p_motivation','p_fitness_level'
+  ];
   for (const id of required) {
     const el = document.getElementById(id);
     if (!el || !el.value.trim()) {
@@ -811,31 +1227,77 @@ function generatePrompts() {
   }
 
   state.profile = {
-    name:            fv('p_name'),
-    age:             fv('p_age'),
-    gender:          fv('p_gender'),
-    height:          fv('p_height'),
-    currentWeight:   fv('p_current_weight'),
-    targetWeight:    fv('p_target_weight'),
-    goalType:        fv('p_goal_type'),
-    activity:        fv('p_activity'),
-    trainingDays:    fv('p_training_days'),
-    environment:     fv('p_environment'),
-    equipment:       fv('p_equipment')          || 'Standard gym equipment',
-    dietPref:        fv('p_diet_pref')          || 'None',
-    unpreferredFoods:fv('p_unpreferred_foods')  || 'None',
-    budget:          fv('p_budget')             || 'Not specified',
-    mealsPerDay:     fv('p_meals_per_day')       || '3',
-    medical:         fv('p_medical')            || 'None',
-    motivation:      fv('p_motivation')
+    // 01 Identity
+    name:               fv('p_name'),
+    age:                fv('p_age'),
+    gender:             fv('p_gender'),
+    height:             fv('p_height'),
+    currentWeight:      fv('p_current_weight'),
+    bodyFat:            fv('p_body_fat')            || 'Not measured',
+    waist:              fv('p_waist')               || 'Not measured',
+    // 02 Objective
+    goalType:           fv('p_goal_type'),
+    secondaryGoal:      fv('p_secondary_goal')      || 'None',
+    targetWeight:       fv('p_target_weight'),
+    deadline:           fv('p_deadline')            || 'No specific deadline',
+    priority:           fv('p_priority')            || 'Not specified',
+    // 03 Condition
+    fitnessLevel:       fv('p_fitness_level'),
+    strengthLevel:      fv('p_strength_level')      || 'Not assessed',
+    cardioLevel:        fv('p_cardio_level')        || 'Not assessed',
+    mobility:           fv('p_mobility')            || 'Not assessed',
+    energyLevels:       fv('p_energy_levels')       || 'Not assessed',
+    activity:           fv('p_activity'),
+    // 04 Training
+    trainingDays:       fv('p_training_days'),
+    sessionDuration:    fv('p_session_duration')    || 'Not specified',
+    environment:        fv('p_environment'),
+    preferredStyle:     fv('p_preferred_style')     || 'No preference',
+    equipment:          fv('p_equipment')           || 'Standard gym equipment',
+    trainingLimitations:fv('p_training_limitations')|| 'None',
+    // 05 Injury
+    injuries:           fv('p_injuries')            || 'None',
+    pain:               fv('p_pain')                || 'None',
+    restrictions:       fv('p_restrictions')        || 'None',
+    posture:            fv('p_posture')             || 'Not assessed',
+    prevInjuries:       fv('p_prev_injuries')       || 'None',
+    medical:            fv('p_medical')             || 'None',
+    // 06 Lifestyle
+    steps:              fv('p_steps')               || 'Not tracked',
+    jobType:            fv('p_job_type')            || 'Not specified',
+    sleepHours:         fv('p_sleep_hours')         || 'Not specified',
+    sleepQuality:       fv('p_sleep_quality')       || 'Not specified',
+    stress:             fv('p_stress')              || 'Not specified',
+    water:              fv('p_water')               || 'Not specified',
+    // 07 Nutrition
+    eatingPattern:      fv('p_eating_pattern')      || 'Not specified',
+    dietType:           fv('p_diet_type')           || 'No restrictions',
+    mealsPerDay:        fv('p_meals_per_day')        || '3',
+    hungerPattern:      fv('p_hunger_pattern')      || 'Not specified',
+    favFoods:           fv('p_fav_foods')           || 'Not specified',
+    unpreferredFoods:   fv('p_unpreferred_foods')   || 'None',
+    allergies:          fv('p_allergies')           || 'None',
+    budget:             fv('p_budget')              || 'Not specified',
+    consistency:        fv('p_consistency')         || 'Not specified',
+    // 08 Advanced nutrition
+    carbCycling:        fv('p_carb_cycling')        || 'No',
+    carbStructure:      fv('p_carb_structure')      || 'N/A',
+    refeed:             fv('p_refeed')              || 'None',
+    cheatMeals:         fv('p_cheat_meals')         || 'None',
+    // 09 Supplements
+    supplements:        fv('p_supplements')         || 'None',
+    openSupplements:    fv('p_open_supplements')    || 'Not specified',
+    recovery:           fv('p_recovery')            || 'Not specified',
+    // 10 Psychology
+    motivation:         fv('p_motivation'),
+    biggestChallenge:   fv('p_biggest_challenge')   || 'Not specified',
+    pastFailures:       fv('p_past_failures')       || 'Not specified',
+    coachingStyle:      fv('p_coaching_style')      || 'Not specified'
   };
 
   const p = state.profile;
   const smart = isSmartMode();
-
-  // Build prompts
-  const nutPrompt   = smart ? buildSmartNutrition(p)  : buildStandardNutrition(p);
-  const trainPrompt = smart ? buildSmartTraining(p)   : buildStandardTraining(p);
+  const unifiedPrompt = buildUnifiedPrompt(p, smart);
 
   // Render profile card
   const wd = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
@@ -845,303 +1307,156 @@ function generatePrompts() {
     <div class="pc-item"><span class="pc-label">Goal</span><span class="pc-val">${p.goalType}</span></div>
     <div class="pc-item"><span class="pc-label">Target Change</span><span class="pc-val">${wdStr}</span></div>
     <div class="pc-item"><span class="pc-label">Training</span><span class="pc-val">${p.trainingDays} days/wk</span></div>
-    <div class="pc-item"><span class="pc-label">Environment</span><span class="pc-val">${p.environment.split(' ')[0]}</span></div>
+    <div class="pc-item"><span class="pc-label">Level</span><span class="pc-val">${p.fitnessLevel.split(' ')[0]}</span></div>
     <div class="pc-item"><span class="pc-label">Mode</span><span class="pc-val" style="color:var(--accent)">${smart ? '⚡ Smart' : 'Standard'}</span></div>
   `;
 
-  document.getElementById('nutPromptText').textContent   = nutPrompt;
-  document.getElementById('trainPromptText').textContent = trainPrompt;
-
-  // Show/hide smart badges
-  const showBadge = smart ? '' : 'none';
-  document.getElementById('nutBadge').style.display   = smart ? '' : 'none';
-  document.getElementById('trainBadge').style.display = smart ? '' : 'none';
+  document.getElementById('unifiedPromptText').textContent = unifiedPrompt;
+  document.getElementById('unifiedBadge').style.display = smart ? '' : 'none';
 
   navTo(2);
 }
 
 // ══════════════════════════════════════════════
-// SMART NUTRITION PROMPT
+// BUILD UNIFIED PROMPT
 // ══════════════════════════════════════════════
-function buildSmartNutrition(p) {
-  const goal     = p.goalType;
-  const budget   = p.budget !== 'Not specified' ? parseInt(p.budget) : null;
-  const isLowBudget  = budget && budget < 600;
-  const hasDisliked  = p.unpreferredFoods !== 'None';
-  const hasMedical   = p.medical !== 'None';
-
-  let roleBlock, strategyDirectives, caloriePrinciple, proteinPrinciple, carbPrinciple, deliverables;
-  let specialRules = '';
-
-  if (goal === 'Fat Loss') {
-    roleBlock = `SERVICE: Fat Loss Nutrition Coaching
-You are a senior certified fat-loss nutritionist with 15+ years of experience. Your strength is building meal plans that create consistent caloric deficits without hunger, metabolic adaptation, or muscle loss. You use high-protein, high-satiety, low-calorie-density strategies that clients can sustain for months.`;
-    strategyDirectives = `- Apply a moderate caloric deficit (350–500 kcal below TDEE — NOT aggressive)
-- Protein must be the non-negotiable anchor: minimum 1.8g/kg bodyweight
-- Prioritize volume eating: high-satiety, low-calorie-density foods (vegetables, lean proteins, legumes)
-- Add explicit hunger-control strategies and appetite management tools
-- Design meals that keep the client full between sessions
-- Include strategies to prevent weekend/social situation derailment
-- Emphasize consistency over perfection`;
-    caloriePrinciple  = 'Moderate deficit — 350 to 500 kcal below calculated TDEE';
-    proteinPrinciple  = 'HIGH — minimum 1.8–2.0g per kg bodyweight to preserve muscle during deficit';
-    carbPrinciple     = 'Moderate to low — timed around training, prioritized post-workout';
-    deliverables = `1. TDEE estimate and caloric deficit target
-2. Macro targets (calories, protein, carbs, fats) with rationale
-3. Full daily meal plan with exact portions (${p.mealsPerDay} meals)
-4. Per-meal calorie + protein breakdown
-5. Hunger-control strategies (timing, food choices, meal structure)
-6. Fat-loss food swaps using Egyptian alternatives
-7. 7-day repeatable structure with variety
-8. Budget-friendly weekly shopping list
-9. Strategies to manage cravings, hunger gaps, and social eating
-10. Common fat-loss nutrition mistakes to avoid
-11. Daily adherence checklist`;
-  }
-  else if (goal === 'Muscle Gain') {
-    roleBlock = `SERVICE: Muscle Gain Nutrition Coaching
-You are a senior certified sports nutritionist specializing in evidence-based muscle hypertrophy nutrition. Your approach is built on controlled caloric surplus, optimized protein distribution, and performance-focused meal timing that maximizes anabolic response without excessive fat gain.`;
-    strategyDirectives = `- Apply a controlled caloric surplus (250–400 kcal above TDEE — lean bulk approach)
-- Protein must support maximum muscle protein synthesis: 1.8–2.2g/kg bodyweight
-- Distribute protein across all meals — no single meal below 30g protein
-- Design pre-workout and post-workout meals as high-priority nutrition windows
-- Include performance-focused carbohydrate timing around training
-- Prioritize calorie-dense, easy-to-eat foods
-- Structure eating to support training energy and recovery`;
-    caloriePrinciple  = 'Controlled surplus — 250 to 400 kcal above calculated TDEE (lean bulk)';
-    proteinPrinciple  = 'HIGH — 1.8–2.2g per kg bodyweight, evenly distributed across all meals';
-    carbPrinciple     = 'HIGH — timed around training sessions for fuel and recovery';
-    deliverables = `1. TDEE estimate and lean bulk caloric surplus target
-2. Macro targets with training-day vs rest-day adjustments
-3. Full daily meal plan (${p.mealsPerDay} meals) with emphasis on pre/post-workout windows
-4. Per-meal calorie + protein breakdown
-5. Pre-workout meal (timing, composition, size)
-6. Post-workout meal/shake recommendations
-7. High-protein, calorie-dense Egyptian food options
-8. 7-day repeatable meal structure
-9. Budget-friendly shopping list
-10. Common muscle-gain nutrition mistakes to avoid
-11. Progress tracking checklist`;
-  }
-  else if (goal === 'Diabetes') {
-    roleBlock = `SERVICE: Diabetes Medical Nutrition Therapy (Type 1)
-You are a diabetes nutrition specialist with extensive clinical experience creating safe, structured meal plans for people with Type 1 diabetes. ABSOLUTE RULE: Do NOT calculate, change, recommend, or comment on insulin doses in any way. Nutrition management only.`;
-    strategyDirectives = `- CRITICAL SAFETY: Never recommend or comment on insulin doses — nutrition management only
-- Distribute carbohydrates evenly and consistently across all meals
-- Prioritize foods with low glycemic index and high fiber content
-- Add safety notes on hypoglycemia-risk foods and situations
-- Structure meal timing for glycemic predictability
-- Include guidance on managing blood sugar around exercise
-- Consistent portion control to help with carbohydrate counting`;
-    caloriePrinciple  = 'Appropriate to goal — balanced to support stable blood glucose levels';
-    proteinPrinciple  = 'Moderate to high — supports satiety and glycemic stability between meals';
-    carbPrinciple     = 'CONTROLLED — evenly distributed, consistent per meal, low GI sources prioritized';
-    deliverables = `1. Carbohydrate distribution target per meal (consistent and predictable)
-2. Recommended foods for glycemic stability (low GI, high fiber)
-3. Full daily meal plan with exact carbohydrate counts per meal
-4. Pre/post-exercise meal guidance for Type 1 diabetes safety
-5. Hypoglycemia-risk awareness and what to keep on hand
-6. Foods to limit or avoid for better glycemic control
-7. 7-day repeatable structure with consistent carb distribution
-8. Egyptian food options that support blood glucose management
-9. Shopping list
-10. Safety disclaimer: nutritional guidance only — insulin adjustments require a licensed endocrinologist
-11. Tracking checklist`;
-    specialRules += '\n- SAFETY REMINDER embedded in output: All insulin decisions must be handled by the client\'s endocrinologist. This plan covers nutrition only.';
-  }
-  else { // Recomp
-    roleBlock = `SERVICE: Body Recomposition Nutrition Coaching
-You are a senior certified sports nutritionist specializing in simultaneous fat loss and muscle retention. Your approach uses precise protein targets and strategic calorie cycling to shift body composition without dramatic weight change.`;
-    strategyDirectives = `- Target maintenance calories or a very small deficit (0–250 kcal below TDEE)
-- Protein is the central lever: 1.8–2.2g/kg bodyweight to drive recomposition
-- Use training-day vs rest-day nutrition differences where appropriate
-- Prioritize nutrient timing to maximize the anabolic window
-- Set realistic expectations: recomposition is slow but sustainable
-- Focus on body composition change, not scale weight`;
-    caloriePrinciple  = 'Near-maintenance or very slight deficit (0–250 kcal below TDEE)';
-    proteinPrinciple  = 'VERY HIGH — 1.8–2.2g per kg, the primary driver of recomposition';
-    carbPrinciple     = 'Moderate — higher on training days, lower on rest days';
-    deliverables = `1. TDEE and recomposition caloric target with rationale
-2. Macro targets — training-day and rest-day breakdowns
-3. Full daily meal plan (${p.mealsPerDay} meals) optimized for recomposition
-4. Per-meal calorie + protein breakdown
-5. Training-day vs rest-day meal adjustments
-6. High-protein Egyptian food options
-7. 7-day repeatable structure
-8. Shopping list
-9. Recomposition progress indicators (measurements, mirror, performance)
-10. Common recomp mistakes to avoid
-11. Adherence checklist`;
-  }
-
-  if (isLowBudget) {
-    specialRules += `\n- BUDGET CONSTRAINT (${budget} EGP/week): Use budget-friendly Egyptian staples only — eggs, lentils, foul medames, frozen chicken, canned tuna, sweet potato, oats, rice, baladi bread, seasonal vegetables. Optimize cost per gram of protein.`;
-  }
-  if (hasDisliked) {
-    specialRules += `\n- DISLIKED FOODS (${p.unpreferredFoods}): Exclude all listed items completely. Do not mention them. Replace silently with nutritionally equivalent alternatives.`;
-  }
-  if (hasMedical) {
-    specialRules += `\n- MEDICAL CONSIDERATIONS (${p.medical}): Adjust plan accordingly. Flag foods or approaches that interact with listed conditions. Safety first.`;
-  }
-
-  let activityNote = '';
-  if (p.activity.includes('Sedentary')) {
-    activityNote = '\nActivity note: Client is sedentary — use minimal activity multiplier. Emphasize habit formation.';
-  } else if (p.activity.includes('Very Active') || p.activity.includes('Extremely Active')) {
-    activityNote = '\nActivity note: Client is highly active — ensure adequate intake to support recovery. Do not under-eat.';
-  }
-
-  return `${roleBlock}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-CLIENT PROFILE
-━━━━━━━━━━━━━━━━━━━━━━━
-- Name: ${p.name}
-- Age: ${p.age} | Gender: ${p.gender}
-- Height: ${p.height} cm | Current weight: ${p.currentWeight} kg | Target weight: ${p.targetWeight} kg
-- Activity level: ${p.activity}
-- Training days/week: ${p.trainingDays}
-- Meals per day: ${p.mealsPerDay}
-- Dietary preferences/restrictions: ${p.dietPref}
-- Weekly food budget (EGP): ${p.budget}
-- Medical conditions / limitations: ${p.medical}
-- Country / food availability: Egypt
-- Client motivation: ${p.motivation}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-NUTRITION STRATEGY PARAMETERS
-━━━━━━━━━━━━━━━━━━━━━━━
-Caloric principle: ${caloriePrinciple}
-Protein principle: ${proteinPrinciple}
-Carbohydrate principle: ${carbPrinciple}${activityNote}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-MANDATORY DIRECTIVES
-━━━━━━━━━━━━━━━━━━━━━━━
-${strategyDirectives}
-- Use exact portion sizes in grams, cups, tablespoons, or pieces
-- Include calorie AND protein estimates for every meal
-- Every recommended food must be available in Egyptian markets
-- Make the plan easy to prep, repeat, and sustain long-term${specialRules}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-REQUIRED DELIVERABLES
-━━━━━━━━━━━━━━━━━━━━━━━
-${deliverables}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-OUTPUT FORMAT
-━━━━━━━━━━━━━━━━━━━━━━━
-Strategy Summary → Nutrition Targets → Meal Plan → Food Swaps → Shopping List → Key Strategies → Mistakes to Avoid → Adherence Checklist
-
-Be specific, practical, and direct. No generic filler. Every sentence must be actionable. Use real Egyptian household foods only.`;
-}
-
-// ══════════════════════════════════════════════
-// SMART TRAINING PROMPT
-// ══════════════════════════════════════════════
-function buildSmartTraining(p) {
+function buildUnifiedPrompt(p, smart) {
   const goal  = p.goalType;
   const days  = parseInt(p.trainingDays) || 3;
   const env   = p.environment || '';
-  const hasMedical = p.medical !== 'None';
 
-  // Split selection
+  const hasInjury   = p.injuries !== 'None' || p.pain !== 'None' || p.restrictions !== 'None';
+  const hasMedical  = p.medical !== 'None';
+  const hasDisliked = p.unpreferredFoods !== 'None';
+  const budget      = p.budget !== 'Not specified' ? parseInt(p.budget) : null;
+  const isLowBudget = budget && budget < 600;
+  const carbCycling = p.carbCycling === 'Yes';
+
+  // ─ Goal-specific nutrition role & directives ─
+  let roleBlock, strategyDirectives, caloriePrinciple, proteinPrinciple, carbPrinciple, nutDeliverables, specialRules = '';
+
+  if (goal === 'Fat Loss') {
+    roleBlock = `SERVICE: Fat Loss — Elite Coaching\nYou are a senior certified fat-loss coach and nutritionist. Your methodology: consistent caloric deficit without hunger or muscle loss, using high-protein, high-satiety, high-volume strategies.`;
+    strategyDirectives = `- Moderate caloric deficit (350–500 kcal below TDEE)
+- Protein anchor: minimum 1.8g/kg bodyweight
+- Volume eating: high-satiety, low-calorie-density foods
+- Explicit hunger-control and appetite management tools
+- Prevent weekend/social derailment
+- Consistency over perfection`;
+    caloriePrinciple  = 'Moderate deficit — 350–500 kcal below TDEE';
+    proteinPrinciple  = 'HIGH — 1.8–2.0g/kg to preserve muscle';
+    carbPrinciple     = 'Moderate to low — timed around training';
+    nutDeliverables   = `1. TDEE estimate and deficit target\n2. Macro targets with rationale\n3. Full daily meal plan (${p.mealsPerDay} meals) with exact portions\n4. Per-meal calorie + protein breakdown\n5. Hunger-control strategies\n6. Fat-loss food swaps (Egyptian alternatives)\n7. 7-day repeatable structure\n8. Budget-friendly shopping list\n9. Craving/social eating management\n10. Common mistakes to avoid\n11. Daily adherence checklist`;
+  } else if (goal === 'Muscle Gain') {
+    roleBlock = `SERVICE: Muscle Gain — Elite Coaching\nYou are a senior certified sports nutritionist and hypertrophy coach. Your methodology: controlled caloric surplus, optimized protein distribution, performance-focused meal timing.`;
+    strategyDirectives = `- Controlled surplus (250–400 kcal above TDEE — lean bulk)
+- Protein: 1.8–2.2g/kg, distributed across all meals
+- No single meal below 30g protein
+- Pre/post-workout nutrition prioritized
+- Calorie-dense, easy-to-eat foods
+- Training-day vs rest-day adjustments`;
+    caloriePrinciple  = 'Controlled surplus — 250–400 kcal above TDEE';
+    proteinPrinciple  = 'HIGH — 1.8–2.2g/kg, evenly distributed';
+    carbPrinciple     = 'HIGH — timed around training sessions';
+    nutDeliverables   = `1. TDEE estimate and surplus target\n2. Macro targets (training vs rest day)\n3. Full daily meal plan (${p.mealsPerDay} meals) with pre/post-workout emphasis\n4. Per-meal calorie + protein breakdown\n5. Pre/post-workout nutrition protocol\n6. High-protein Egyptian food options\n7. 7-day structure\n8. Shopping list\n9. Common bulking mistakes to avoid\n10. Progress tracking checklist`;
+  } else if (goal === 'Diabetes') {
+    roleBlock = `SERVICE: Diabetes Medical Nutrition Therapy (Type 1) — Elite Coaching\nYou are a diabetes nutrition specialist. ABSOLUTE RULE: Do NOT calculate, change, or comment on insulin doses in any way. Nutrition management only.`;
+    strategyDirectives = `- CRITICAL: Never recommend or comment on insulin doses
+- Distribute carbohydrates evenly across all meals
+- Prioritize low-GI, high-fiber foods
+- Safety notes on hypoglycemia-risk situations
+- Consistent portion control for carb counting
+- Guidance on managing blood sugar around exercise`;
+    caloriePrinciple  = 'Balanced to support stable blood glucose';
+    proteinPrinciple  = 'Moderate to high — supports glycemic stability';
+    carbPrinciple     = 'CONTROLLED — evenly distributed, consistent per meal, low GI';
+    nutDeliverables   = `1. Carbohydrate distribution target per meal\n2. Recommended foods for glycemic stability\n3. Full daily meal plan with exact carb counts\n4. Pre/post-exercise meal guidance for Type 1 safety\n5. Hypoglycemia risk awareness\n6. Foods to limit for glycemic control\n7. 7-day repeatable structure\n8. Egyptian food options for blood glucose management\n9. Shopping list\n10. Safety disclaimer (nutrition only — insulin requires endocrinologist)\n11. Tracking checklist`;
+    specialRules += '\n- SAFETY EMBEDDED: All insulin decisions must be handled by the client\'s endocrinologist. This plan covers nutrition only.';
+  } else {
+    roleBlock = `SERVICE: Body Recomposition — Elite Coaching\nYou are a senior certified sports nutritionist and recomposition specialist. Your methodology: shift body composition using precise protein targets and strategic calorie management.`;
+    strategyDirectives = `- Maintenance or very small deficit (0–250 kcal below TDEE)
+- Protein is the central lever: 1.8–2.2g/kg
+- Training-day vs rest-day nutrition differences
+- Nutrient timing to maximize anabolic window
+- Set realistic expectations — recomp is slow
+- Focus on body composition, not scale weight`;
+    caloriePrinciple  = 'Near-maintenance or slight deficit (0–250 kcal below TDEE)';
+    proteinPrinciple  = 'VERY HIGH — 1.8–2.2g/kg, primary driver of recomp';
+    carbPrinciple     = 'Moderate — higher training days, lower rest days';
+    nutDeliverables   = `1. TDEE and recomp caloric target\n2. Macro targets — training vs rest day\n3. Full daily meal plan (${p.mealsPerDay} meals) optimized for recomp\n4. Per-meal calorie + protein breakdown\n5. Training vs rest-day meal adjustments\n6. High-protein Egyptian food options\n7. 7-day structure\n8. Shopping list\n9. Recomp progress indicators\n10. Common mistakes\n11. Adherence checklist`;
+  }
+
+  if (isLowBudget) {
+    specialRules += `\n- BUDGET CONSTRAINT (${budget} EGP/week): Budget-friendly Egyptian staples only — eggs, lentils, foul, frozen chicken, canned tuna, sweet potato, oats, rice, baladi bread, seasonal vegetables.`;
+  }
+  if (hasDisliked) {
+    specialRules += `\n- DISLIKED FOODS (${p.unpreferredFoods}): Exclude all listed items completely. Replace silently with equivalent alternatives.`;
+  }
+  if (p.allergies !== 'None') {
+    specialRules += `\n- ALLERGIES (${p.allergies}): Strictly avoid. Flag any risk food.`;
+  }
+  if (hasMedical) {
+    specialRules += `\n- MEDICAL CONDITIONS (${p.medical}): Adjust plan accordingly. Safety first.`;
+  }
+
+  // ─ Training split ─
   let splitDirective;
   if (days <= 3) {
-    splitDirective = `MANDATORY SPLIT: Full Body — ${days} days/week. Each session trains all major muscle groups with slightly different emphasis per day (e.g., Day A: squat-dominant, Day B: hinge-dominant, Day C: push-dominant).`;
+    splitDirective = `MANDATORY SPLIT: Full Body — ${days} days/week. Each session trains all major muscle groups with varied emphasis per day.`;
   } else if (days === 4) {
-    splitDirective = `MANDATORY SPLIT: Upper/Lower 4-day split. Upper A + Lower A + Upper B + Lower B. Twice-per-week muscle group frequency with adequate recovery.`;
+    splitDirective = `MANDATORY SPLIT: Upper/Lower 4-day split. Upper A + Lower A + Upper B + Lower B. Twice-weekly muscle group frequency with adequate recovery.`;
   } else {
-    splitDirective = `MANDATORY SPLIT: Push/Pull/Legs${days === 6 ? ' × 2 (6-day)' : ' + accessory day'}. High-frequency hypertrophy split for very active clients.`;
+    splitDirective = `MANDATORY SPLIT: Push/Pull/Legs${days === 6 ? ' × 2 (6-day)' : ' + accessory day'}. High-frequency split for active clients.`;
   }
 
-  // Environment
+  // ─ Equipment ─
   let equipmentDirective;
   if (env.includes('Gym')) {
-    equipmentDirective = `ENVIRONMENT: Full gym access. Use barbells, dumbbells, cables, machines, racks. Do not restrict to bodyweight or bands.`;
+    equipmentDirective = `ENVIRONMENT: Full gym access. Use barbells, dumbbells, cables, machines, racks.`;
   } else if (env.includes('Home') && !env.toLowerCase().includes('no equipment') && !env.toLowerCase().includes('bodyweight')) {
-    equipmentDirective = `ENVIRONMENT: Home gym — limited equipment (${p.equipment}). Use dumbbells, resistance bands, and compound bodyweight movements. Provide load progression using available tools.`;
+    equipmentDirective = `ENVIRONMENT: Home gym — limited equipment (${p.equipment}). Use compound bodyweight and loaded movements.`;
   } else if (env.toLowerCase().includes('bodyweight') || env.toLowerCase().includes('no equipment')) {
-    equipmentDirective = `ENVIRONMENT: Bodyweight only. Use calisthenics progression — leverage changes, tempo manipulation, unilateral work, isometric holds. Include skill progressions (e.g., push-up → archer push-up → pseudo planche).`;
+    equipmentDirective = `ENVIRONMENT: Bodyweight only. Use calisthenics progressions — leverage changes, tempo, unilateral work, isometric holds.`;
   } else if (env.includes('Hybrid')) {
-    equipmentDirective = `ENVIRONMENT: Hybrid. Gym sessions for heavy compound work, home sessions for accessory and conditioning. Ensure program coherence across both environments.`;
+    equipmentDirective = `ENVIRONMENT: Hybrid. Gym sessions for heavy compounds, home sessions for accessory/conditioning.`;
   } else {
-    equipmentDirective = `ENVIRONMENT: Outdoor. Use park equipment, calisthenics, running/sprinting, and resistance bands. Sessions must be executable without fixed machines.`;
+    equipmentDirective = `ENVIRONMENT: Outdoor. Park equipment, calisthenics, running/sprinting, resistance bands.`;
   }
 
-  // Goal directives
+  // ─ Goal training directives ─
   let goalDirectives, periodizationBlock;
   if (goal === 'Fat Loss') {
-    goalDirectives = `GOAL DIRECTIVES — FAT LOSS:
-- Preserve lean mass while maximizing metabolic demand
-- Add metabolic conditioning circuits on at least 2 sessions/week
-- Cardio protocol: ${days <= 3 ? 'LISS cardio 20–30 min post-session' : 'HIIT 2x/week on non-consecutive days + LISS 1–2x/week'}
-- Rep ranges: 8–15 for hypertrophy-metabolic overlap
-- Rest periods: shorter (45–75 sec) to increase caloric expenditure
-- Do not drop weights excessively — keep intensity high enough to preserve muscle
-- Higher training frequency preferred`;
-    periodizationBlock = `PERIODIZATION: Linear metabolic progression
-- Weeks 1–3: Accumulation — moderate volume, circuit-style
-- Weeks 4–6: Intensification — add load, reduce rest
-- Weeks 4 & 8: Deload — 40% volume reduction
-- Weeks 7–9: Peak metabolic phase
-- Weeks 10–12: Strength retention + conditioning hybrid`;
+    goalDirectives = `GOAL DIRECTIVES — FAT LOSS:\n- Preserve lean mass while maximizing metabolic demand\n- Metabolic conditioning circuits on 2 sessions/week\n- Cardio: ${days <= 3 ? 'LISS 20–30 min post-session' : 'HIIT 2x/week + LISS 1–2x/week'}\n- Rep ranges: 8–15\n- Rest: 45–75 sec to increase caloric expenditure\n- Maintain intensity to preserve muscle`;
+    periodizationBlock = `PERIODIZATION: Linear metabolic progression\n- Weeks 1–3: Accumulation — moderate volume, circuit-style\n- Weeks 4–6: Intensification — add load, reduce rest\n- Weeks 4 & 8: Deload — 40% volume reduction\n- Weeks 7–9: Peak metabolic phase\n- Weeks 10–12: Strength retention + conditioning hybrid`;
   } else if (goal === 'Muscle Gain') {
-    goalDirectives = `GOAL DIRECTIVES — MUSCLE GAIN (HYPERTROPHY):
-- Maximize muscle protein synthesis via progressive mechanical tension and volume
-- Rep ranges: 6–12 for primary compounds, 10–20 for accessories
-- Rest periods: 2–3 min for compounds, 60–90 sec for accessories
-- Volume targets: beginner 10–12 sets/muscle/week, intermediate 14–18, advanced 16–22
-- Progressive overload: add 2.5–5 kg or 1–2 reps per week per lift
-- Cardio: minimal — 1–2 short LISS sessions only
-- Prioritize compound anchors: squat, deadlift, bench, row, overhead press`;
-    periodizationBlock = `PERIODIZATION: Linear hypertrophy progression
-- Weeks 1–3: Volume accumulation — moderate load, higher sets
-- Weeks 4–6: Intensification — increase load 5–10%, reduce volume 10%
-- Weeks 4 & 8: Deload — 50% volume, same exercises
-- Weeks 7–9: High intensity strength phase
-- Weeks 10–12: Peak hypertrophy — maximized volume before program end`;
+    goalDirectives = `GOAL DIRECTIVES — HYPERTROPHY:\n- Maximize muscle protein synthesis via progressive tension and volume\n- Rep ranges: 6–12 compounds, 10–20 accessories\n- Rest: 2–3 min compounds, 60–90 sec accessories\n- Progressive overload: +2.5–5 kg or 1–2 reps/week\n- Cardio: minimal — 1–2 short LISS sessions only\n- Anchor compounds: squat, deadlift, bench, row, overhead press`;
+    periodizationBlock = `PERIODIZATION: Linear hypertrophy progression\n- Weeks 1–3: Volume accumulation — moderate load, higher sets\n- Weeks 4–6: Intensification — increase load 5–10%, reduce volume 10%\n- Weeks 4 & 8: Deload — 50% volume, same exercises\n- Weeks 7–9: High intensity strength phase\n- Weeks 10–12: Peak hypertrophy — maximized volume before program end`;
   } else if (goal === 'Diabetes') {
-    goalDirectives = `GOAL DIRECTIVES — DIABETES (TYPE 1):
-- Safe, effective training that supports glycemic stability
-- Moderate-intensity resistance training preferred over extreme HIIT
-- Include post-exercise guidance relevant to blood sugar management
-- Avoid fasted training without specific medical clearance
-- Low-to-moderate intensity steady-state cardio preferred over maximal output
-- Clear session timing recommendations relative to meals`;
-    periodizationBlock = `PERIODIZATION: Conservative progressive overload
-- Low-to-moderate intensity throughout all 12 weeks
-- Gradual volume increases only — no sudden spikes
-- Deload weeks 4, 8, 12
-- Emphasize recovery and consistency over intensity peaks`;
+    goalDirectives = `GOAL DIRECTIVES — DIABETES (TYPE 1):\n- Safe training supporting glycemic stability\n- Moderate-intensity resistance training preferred\n- Post-exercise guidance relevant to blood sugar management\n- Avoid fasted training without medical clearance\n- Low-to-moderate steady-state cardio preferred`;
+    periodizationBlock = `PERIODIZATION: Conservative progressive overload\n- Low-to-moderate intensity throughout\n- Gradual volume increases only\n- Deload weeks 4, 8, 12\n- Emphasize recovery and consistency over intensity peaks`;
   } else {
-    goalDirectives = `GOAL DIRECTIVES — BODY RECOMPOSITION:
-- Balance strength/hypertrophy training with metabolic conditioning
-- Rep ranges: 6–15 (varied) to stimulate strength and hypertrophy simultaneously
-- Include metabolic finishers (5–10 min) at session end on 2 days/week
-- Cardio: 2x/week moderate intensity — enough to support fat reduction, not enough to impair recovery
-- Progressive overload is essential — do not stagnate on loads`;
-    periodizationBlock = `PERIODIZATION: Undulating recomposition model
-- Weeks 1–4: Foundation — movement quality and base volume
-- Weeks 5–8: Intensification — increase loads, introduce metabolic elements
-- Weeks 9–12: Peak phase — highest volume/intensity balance
-- Deload: weeks 4, 8 (reduce volume 40%, maintain movement patterns)`;
+    goalDirectives = `GOAL DIRECTIVES — RECOMPOSITION:\n- Balance strength/hypertrophy with metabolic conditioning\n- Rep ranges: 6–15 (varied)\n- Metabolic finishers (5–10 min) on 2 days/week\n- Cardio: 2x/week moderate — support fat reduction without impairing recovery\n- Progressive overload is essential`;
+    periodizationBlock = `PERIODIZATION: Undulating recomposition model\n- Weeks 1–4: Foundation — movement quality and base volume\n- Weeks 5–8: Intensification — increase loads, introduce metabolic elements\n- Weeks 9–12: Peak phase — highest volume/intensity balance\n- Deload: weeks 4, 8 (reduce volume 40%, maintain patterns)`;
   }
 
   let medicalBlock = '';
-  if (hasMedical) {
+  if (hasInjury || hasMedical) {
     medicalBlock = `
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 MEDICAL & INJURY SAFETY PROTOCOL
 ━━━━━━━━━━━━━━━━━━━━━━━
-Reported conditions/limitations: ${p.medical}
+Current injuries: ${p.injuries}
+Pain areas: ${p.pain}
+Movement restrictions: ${p.restrictions}
+Previous injuries: ${p.prevInjuries}
+Medical conditions: ${p.medical}
+Posture issues: ${p.posture}
 
 MANDATORY RULES:
-- Identify every movement pattern that could aggravate listed condition(s)
+- Identify every movement pattern that could aggravate listed conditions
 - For EACH prohibited pattern, provide a safe effective substitute
-- Do not load the injured/limited structure into pain
+- Do not load injured/limited structure into pain
 - Adjust ROM, load, and tempo as needed
 - Flag any exercise requiring extra caution
 - Include specific recovery and mobility recommendations`;
@@ -1149,33 +1464,123 @@ MANDATORY RULES:
 
   let activityNote = '';
   if (p.activity.includes('Sedentary')) {
-    activityNote = `\nACTIVITY NOTE: Client is sedentary — begin at the lower end of volume range. Focus on movement quality and habit formation in weeks 1–4.`;
+    activityNote = `\nACTIVITY NOTE: Client is sedentary — begin at lower end of volume range. Focus on movement quality and habit formation weeks 1–4.`;
   } else if (p.activity.includes('Very Active') || p.activity.includes('Extremely Active')) {
-    activityNote = `\nACTIVITY NOTE: Client is highly active — can tolerate higher starting volume. Account for total activity load when prescribing additional cardio.`;
+    activityNote = `\nACTIVITY NOTE: Client is highly active — can tolerate higher starting volume. Account for total activity load when prescribing cardio.`;
   }
 
-  return `SYSTEM: Smart Strength & Conditioning AI — Adaptive Periodization Architect — Injury-Safe Performance Coach
-[GOAL: ${goal} | ENVIRONMENT: ${env} | DAYS: ${days}/week]
-
-Your task: Build a complete 12-week training system fully customized to this client's goal, environment, equipment, activity level, and limitations.
-
-━━━━━━━━━━━━━━━━━━━━━━━
-CLIENT PROFILE
-━━━━━━━━━━━━━━━━━━━━━━━
-- Name: ${p.name}
-- Age: ${p.age} | Gender: ${p.gender}
-- Height: ${p.height} cm | Weight: ${p.currentWeight} kg
-- Primary Goal: ${goal}
-- Training Days/Week: ${days}
-- Training Environment: ${env}
-- Available Equipment: ${p.equipment}
-- Activity Level: ${p.activity}
-- Medical Conditions / Injuries / Limitations: ${p.medical}
-- Client Motivation: ${p.motivation}
+  let psychBlock = '';
+  if (p.biggestChallenge !== 'Not specified' || p.pastFailures !== 'Not specified' || p.coachingStyle !== 'Not specified') {
+    psychBlock = `
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PROGRAM ARCHITECTURE
+PSYCHOLOGY & ADHERENCE CONTEXT
 ━━━━━━━━━━━━━━━━━━━━━━━
+Biggest challenge: ${p.biggestChallenge}
+Past failures: ${p.pastFailures}
+Preferred coaching style: ${p.coachingStyle}
+Dietary consistency: ${p.consistency}
+
+APPLY: Tailor communication tone and plan structure to match client psychology. Address known failure points directly. Design the plan around the client's real-world constraints, not ideal conditions.`;
+  }
+
+  let carbBlock = '';
+  if (carbCycling) {
+    carbBlock = `
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ADVANCED NUTRITION — CARB CYCLING
+━━━━━━━━━━━━━━━━━━━━━━━
+Carb cycling: YES
+Structure: ${p.carbStructure}
+Refeed days: ${p.refeed}
+Cheat meals: ${p.cheatMeals}
+
+Implement carb cycling protocol within the macro framework above. Specify exact carbohydrate targets for high, medium, and low days aligned with training schedule.`;
+  }
+
+  let suppBlock = '';
+  if (p.supplements !== 'None' || p.openSupplements !== 'Not specified') {
+    suppBlock = `
+
+━━━━━━━━━━━━━━━━━━━━━━━
+SUPPLEMENTS & RECOVERY
+━━━━━━━━━━━━━━━━━━━━━━━
+Current supplements: ${p.supplements}
+Open to new supplements: ${p.openSupplements}
+Recovery methods: ${p.recovery}
+
+Include supplement recommendations aligned with goal. Only suggest evidence-based supplements. Do not recommend unnecessary products.`;
+  }
+
+  return `SYSTEM: Elite Coaching Engine — Adaptive Nutrition & Periodization Architect — Injury-Safe Performance Coach
+[GOAL: ${goal} | LEVEL: ${p.fitnessLevel} | ENVIRONMENT: ${env} | DAYS: ${days}/week]
+
+Your task: Build a COMPLETE integrated coaching system — full 12-week training program + full nutrition plan — fully customized to this client's goal, environment, level, lifestyle, and limitations.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT PROFILE — FULL INTAKE
+━━━━━━━━━━━━━━━━━━━━━━━
+NAME: ${p.name}
+AGE: ${p.age} | GENDER: ${p.gender}
+HEIGHT: ${p.height} cm | WEIGHT: ${p.currentWeight} kg | BODY FAT: ${p.bodyFat} | WAIST: ${p.waist} cm
+TARGET WEIGHT: ${p.targetWeight} kg | DEADLINE: ${p.deadline}
+PRIMARY GOAL: ${goal} | SECONDARY GOAL: ${p.secondaryGoal} | PRIORITY LEVEL: ${p.priority}/10
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CURRENT CONDITION
+━━━━━━━━━━━━━━━━━━━━━━━
+Fitness level: ${p.fitnessLevel}
+Strength level: ${p.strengthLevel}
+Cardio level: ${p.cardioLevel}
+Mobility: ${p.mobility}
+Energy levels: ${p.energyLevels}
+Activity level: ${p.activity}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+TRAINING PARAMETERS
+━━━━━━━━━━━━━━━━━━━━━━━
+Training days/week: ${p.trainingDays}
+Session duration: ${p.sessionDuration}
+Environment: ${p.environment}
+Equipment: ${p.equipment}
+Preferred style: ${p.preferredStyle}
+Training limitations: ${p.trainingLimitations}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+LIFESTYLE FACTORS
+━━━━━━━━━━━━━━━━━━━━━━━
+Daily steps: ${p.steps}
+Job type: ${p.jobType}
+Sleep: ${p.sleepHours} | Quality: ${p.sleepQuality}
+Stress: ${p.stress}
+Water intake: ${p.water}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+NUTRITION PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━
+Eating pattern: ${p.eatingPattern}
+Diet type: ${p.dietType}
+Meals per day: ${p.mealsPerDay}
+Hunger pattern: ${p.hungerPattern}
+Favorite foods: ${p.favFoods}
+Disliked foods: ${p.unpreferredFoods}
+Allergies: ${p.allergies}
+Weekly budget (EGP): ${p.budget}
+Dietary consistency: ${p.consistency}
+Cheat meals: ${p.cheatMeals}
+Refeed days: ${p.refeed}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT MOTIVATION
+━━━━━━━━━━━━━━━━━━━━━━━
+${p.motivation}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+COACHING ENGINE — PART A: TRAINING
+━━━━━━━━━━━━━━━━━━━━━━━
+${roleBlock}
+
 ${splitDirective}
 
 ${equipmentDirective}
@@ -1185,111 +1590,44 @@ ${goalDirectives}
 ${periodizationBlock}${activityNote}${medicalBlock}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-REQUIRED OUTPUT (STRICT FORMAT)
+TRAINING OUTPUT REQUIRED (STRICT FORMAT)
 ━━━━━━━━━━━━━━━━━━━━━━━
-A) CLIENT SNAPSHOT — Status, goal, limitations, selected strategy rationale
-B) TRAINING STRATEGY — Why this split, why this periodization, what 12 weeks will achieve
-C) SPLIT DESIGN — Session structure with day-by-day breakdown
+A) CLIENT SNAPSHOT — Status, goal, limitations, strategy rationale
+B) TRAINING STRATEGY — Why this split, why this periodization, 12-week outcome
+C) SPLIT DESIGN — Session structure, day-by-day breakdown
 D) 12-WEEK MACRO OVERVIEW TABLE — Week | Phase | Goal | Volume | Intensity | Focus | Deload Note
 E) FULL PROGRAM — Every session, every week. Per exercise: Sets / Reps / RPE | Rest | Tempo | Substitution
 F) PROGRESSION MODEL — Weekly load targets, deload triggers, progress measurement${goal === 'Fat Loss' ? '\nG) CARDIO PROTOCOL — Type, duration, intensity, placement relative to resistance sessions' : ''}
 Final: COACHING NOTES — What the client must know to execute this program correctly
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-STYLE RULES
+COACHING ENGINE — PART B: NUTRITION
+━━━━━━━━━━━━━━━━━━━━━━━
+Caloric principle: ${caloriePrinciple}
+Protein principle: ${proteinPrinciple}
+Carbohydrate principle: ${carbPrinciple}
+
+MANDATORY DIRECTIVES:
+${strategyDirectives}
+- Exact portion sizes in grams, cups, tablespoons, or pieces
+- Calorie AND protein estimates for every meal
+- Every food must be available in Egyptian markets
+- Plan must be easy to prep, repeat, and sustain${specialRules}${carbBlock}${suppBlock}${psychBlock}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+NUTRITION OUTPUT REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━
+${nutDeliverables}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+GLOBAL STYLE RULES
 ━━━━━━━━━━━━━━━━━━━━━━━
 - No motivational filler — every line must be actionable
-- Do not assume equipment not listed above
+- Do not assume equipment not listed
 - Do not ignore injuries or limitations
 - Output must be coach-grade — not generic fitness blog content
-- Use sport science terminology where appropriate`;
-}
-
-// ══════════════════════════════════════════════
-// STANDARD PROMPTS (Smart Mode OFF)
-// ══════════════════════════════════════════════
-function buildStandardNutrition(p) {
-  const serviceMap = {
-    'Fat Loss':    'SERVICE: Weight Loss — Nutrition Coaching\nYou are a senior certified nutritionist and fat-loss coach with 15+ years of experience designing personalized, high-protein meal plans for sustainable weight loss.',
-    'Muscle Gain': 'SERVICE: Muscle Gain — Nutrition Coaching\nYou are a senior certified nutritionist with 15+ years of experience creating practical, high-protein meal plans for controlled, sustainable weight gain.',
-    'Diabetes':    'SERVICE: Diabetes — Medical Nutrition Therapy (Type 1)\nYou are a diabetes nutrition specialist. CRITICAL: Do not calculate, change, or recommend insulin doses. Nutrition management only.',
-    'Recomp':      'SERVICE: Body Recomposition — Nutrition Coaching\nYou are a senior certified nutritionist with 15+ years of experience designing recomposition-focused, high-protein meal plans.'
-  };
-  const serviceBlock = serviceMap[p.goalType] || serviceMap['Recomp'];
-  const wd = parseFloat(p.targetWeight) - parseFloat(p.currentWeight);
-  const wdStr = wd < 0 ? 'loss' : wd > 0 ? 'gain' : 'maintenance';
-
-  return `${serviceBlock}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-CLIENT DETAILS
-━━━━━━━━━━━━━━━━━━━━━━━
-- Name: ${p.name}
-- Age: ${p.age} | Gender: ${p.gender}
-- Height: ${p.height} cm | Current: ${p.currentWeight} kg | Target: ${p.targetWeight} kg (${Math.abs(wd).toFixed(1)} kg ${wdStr})
-- Activity level: ${p.activity}
-- Training days/week: ${p.trainingDays}
-- Dietary preferences: ${p.dietPref}
-- Disliked foods: ${p.unpreferredFoods}
-- Weekly food budget (EGP): ${p.budget}
-- Meals per day: ${p.mealsPerDay}
-- Medical conditions: ${p.medical}
-- Country: Egypt
-- Client motivation: ${p.motivation}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-REQUIREMENTS
-━━━━━━━━━━━━━━━━━━━━━━━
-- High-protein meals — exact portions in grams/cups/pieces
-- Estimated calories AND protein per meal
-- Affordable, common Egyptian foods only
-- Easy to repeat and prep
-- Hunger-control and adherence strategies
-- Smart swaps for disliked or unavailable foods
-
-━━━━━━━━━━━━━━━━━━━━━━━
-DELIVER
-━━━━━━━━━━━━━━━━━━━━━━━
-1. Strategy assessment and calorie/macro targets
-2. Full daily meal plan (${p.mealsPerDay} meals) with exact portions
-3. Calories and protein per meal
-4. 7-day repeatable structure
-5. Shopping list
-6. Food swaps
-7. Adherence tips and checklist`;
-}
-
-function buildStandardTraining(p) {
-  return `SYSTEM: Strength & Conditioning AI — Periodization Architect — Injury-Safe Coach
-
-Build a complete 12-week training program customized to this client's goal, equipment, and limitations.
-
-━━━━━━━━━━━━━━━━━━━━━━━
-CLIENT PROFILE
-━━━━━━━━━━━━━━━━━━━━━━━
-- Name: ${p.name}
-- Age: ${p.age} | Gender: ${p.gender}
-- Height: ${p.height} cm | Weight: ${p.currentWeight} kg
-- Primary Goal: ${p.goalType}
-- Training Days/Week: ${p.trainingDays}
-- Environment: ${p.environment}
-- Equipment: ${p.equipment}
-- Activity Level: ${p.activity}
-- Medical / Injuries: ${p.medical}
-- Motivation: ${p.motivation}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-DELIVER
-━━━━━━━━━━━━━━━━━━━━━━━
-A) Client snapshot and strategy rationale
-B) Split design with scientific rationale
-C) 12-week macro overview table
-D) Full program — every session. Per exercise: Sets / Reps / RPE | Rest | Substitution
-E) Progression model and deload structure
-F) Injury safety rules — prohibited movements + safe substitutes
-G) Coaching notes
-
-Style: coach-grade, actionable, no filler, no generic content.`;
+- Use sport science terminology where appropriate
+- Adapt tone to client's preferred coaching style: ${p.coachingStyle}`;
 }
 
 // ══════════════════════════════════════════════
